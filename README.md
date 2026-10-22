@@ -39,12 +39,12 @@ Element Plus 提供的是一块块"砖"：`el-form`、`el-table`、`el-tree`、`
 | 直接使用 Element Plus 的常见问题 | `ep-container-kit` 的处理方式 |
 | --- | --- |
 | 每个页面重复写 `label-width`、按钮区、校验触发时机 | 由 `CkFormContainer` 统一接管，Schema 只描述字段 |
-| 表格高度算不准，滚动条出现在错误的位置 | `TableContainer` 只负责高度计算与布局，`el-table` 由你通过插槽传入 |
-| `el-table-column` 写几十行，改一个字段要改多处 | `TableColumn` 支持单条 Schema 配置，列定义数据化 |
-| 详情页键值对布局靠手写 `el-row`/`el-col` | `DetailContainer` 提供网格布局配置，`DetailItem` 负责单条键值对 |
-| 字典/枚举值到处写 `map` 手动翻译 | 全局注入字典解析方法，`DetailItem` 自动翻译，支持局部覆盖 |
-| 树数据一次全量加载，节点多了卡死 | `TreeContainer` / `TreeSelect` 支持**非叶子节点级分页加载** |
-| 分页组件放进下拉弹层后层级、定位异常 | `PaginationContainer` 已适配在 `ElTreeSelect` 等 popper 容器内的渲染 |
+| 表格高度算不准，滚动条出现在错误的位置 | `CkTableContainer` 只负责高度计算与布局，`el-table` 由你通过插槽传入 |
+| `el-table-column` 写几十行，改一个字段要改多处 | `CkTableColumn` 支持单条 Schema 配置，列定义数据化 |
+| 详情页键值对布局靠手写 `el-row`/`el-col` | `CkDetailContainer` 提供网格布局配置，`CkDetailItem` 负责单条键值对 |
+| 字典/枚举值到处写 `map` 手动翻译 | 全局注入字典解析方法，`CkDetailItem` 自动翻译，支持局部覆盖 |
+| 树数据一次全量加载，节点多了卡死 | `CkTreeContainer` / `CkTreeSelect` 支持**非叶子节点级分页加载** |
+| 分页组件放进下拉弹层后层级、定位异常 | `CkPaginationContainer` 已适配在 `ElTreeSelect` 等 popper 容器内的渲染 |
 | 全量引入样式，包里塞了一堆用不到的 CSS | 样式产物**按模块拆分**，可以只引入用到的模块 |
 
 ---
@@ -64,7 +64,7 @@ Element Plus 提供的是一块块"砖"：`el-form`、`el-table`、`el-tree`、`
 
 ## 组件总览
 
-组件按业务场景分为四类，共 11 个：
+组件按业务场景分为五类，共 12 个：
 
 ### Form · 表单
 
@@ -78,25 +78,30 @@ Element Plus 提供的是一块块"砖"：`el-form`、`el-table`、`el-tree`、`
 
 | 组件 | 说明 |
 | --- | --- |
-| `TableContainer` | 表格容器，提供分页插槽与默认内容槽，统一处理内部 `ElTable` 的高度 |
-| `TableColumn` | `ElTableColumn` 的轻量封装，支持单条 SchemaItem 配置 |
-| `TableColumnSchema` | `TableColumn` 的 Schema 实现与类型定义 |
-| `PaginationContainer` | 分页组件的轻量封装，支持在 Select / TreeSelect 的 popper 中使用 |
+| `CkTableContainer` | 表格容器，提供分页插槽与默认内容槽，统一处理内部 `ElTable` 的高度 |
+| `CkTableColumn` | `ElTableColumn` 的轻量封装，支持单条 SchemaItem 配置 |
+| `CkTableColumnSchema` | `CkTableColumn` 的 Schema 实现与类型定义 |
+
+### Pagination · 分页
+
+| 组件 | 说明 |
+| --- | --- |
+| `CkPaginationContainer` | 分页组件的轻量封装，支持在 Select / TreeSelect 的 popper 中使用 |
 
 ### Tree · 树
 
 | 组件 | 说明 |
 | --- | --- |
-| `TreeContainer` | 树容器，内置过滤输入框与内容插槽，统一处理树的滚动 |
-| `TreeSelect` | 在 `ElTreeSelect` 基础上整合 `PaginationContainer`，支持树的分页查询 |
+| `CkTreeContainer` | 树容器，内置过滤输入框与内容插槽，统一处理树的滚动 |
+| `CkTreeSelect` | 在 `ElTreeSelect` 基础上整合 `CkPaginationContainer`，支持树的分页查询 |
 
 ### Detail · 详情
 
 | 组件 | 说明 |
 | --- | --- |
-| `DetailContainer` | 键值对容器，提供标题与内容插槽，支持 Schema 配置与子元素布局 |
-| `DetailItem` | 单个键值对，支持枚举/字典翻译、文本省略、标题与内容插槽 |
-| `DetailItemSchema` | `DetailItem` 的 Schema 实现与类型定义 |
+| `CkDetailContainer` | 键值对容器，提供标题与内容插槽，支持 Schema 配置与子元素布局 |
+| `CkDetailItem` | 单个键值对，支持枚举/字典翻译、文本省略、标题与内容插槽 |
+| `CkDetailItemSchema` | `CkDetailItem` 的 Schema 实现与类型定义 |
 
 ---
 
@@ -147,8 +152,9 @@ app.mount('#app')
 组件与样式均支持按需引入，只引入用到的模块：
 
 ```ts
-import { CkFormContainer, CkFormItem, TableContainer, PaginationContainer } from 'ep-container-kit'
+import { CkFormContainer, CkFormItem, CkTableContainer, CkPaginationContainer } from 'ep-container-kit'
 import 'ep-container-kit/dist/form.css'
+import 'ep-container-kit/dist/pagination.css'
 import 'ep-container-kit/dist/table.css'
 ```
 
@@ -178,9 +184,10 @@ app.mount('#app')
 | 模块 | 样式文件 | 覆盖的组件 |
 | --- | --- | --- |
 | Form | `ep-container-kit/dist/form.css` | `CkFormContainer`、`CkFormItem` |
-| Table | `ep-container-kit/dist/table.css` | `TableContainer`、`TableColumn`、`PaginationContainer` |
-| Tree | `ep-container-kit/dist/tree.css` | `TreeContainer`、`TreeSelect` |
-| Detail | `ep-container-kit/dist/detail.css` | `DetailContainer`、`DetailItem` |
+| Table | `ep-container-kit/dist/table.css` | `CkTableContainer`、`CkTableColumn` |
+| Pagination | `ep-container-kit/dist/pagination.css` | `CkPaginationContainer` |
+| Tree | `ep-container-kit/dist/tree.css` | `CkTreeContainer`、`CkTreeSelect` |
+| Detail | `ep-container-kit/dist/detail.css` | `CkDetailContainer`、`CkDetailItem` |
 
 ---
 
@@ -262,30 +269,29 @@ import '@ep-container-kit/styles/form.scss'
 一个 Form 的 Schema 长这样：
 
 ```ts
-import type { FormItemSchema } from 'ep-container-kit'
+import type { FormContainerItem } from 'ep-container-kit'
 
-const schema: FormItemSchema<UserForm>[] = [
+const schema: FormContainerItem<UserForm>[] = [
   {
-    field: 'username',
+    prop: 'username',
     label: '用户名',
-    component: 'input',
-    componentProps: { placeholder: '请输入用户名', clearable: true },
+    type: 'input',
+    props: { placeholder: '请输入用户名', clearable: true },
     rules: [{ required: true, message: '用户名不能为空' }],
   },
   {
-    field: 'role',
+    prop: 'role',
     label: '角色',
-    component: 'select',
-    options: roleOptions,
-    show: (form) => form.type !== 'internal',   // 动态显隐
+    type: 'select',
+    props: { options: roleOptions },
   },
 ]
 ```
 
 设计上遵循两条边界：
 
-1. **Schema 只收录高频变化的配置**，其余原生属性通过 `componentProps` 原样透传，避免 Schema 无限膨胀。
-2. **动态逻辑用函数表达**，而不是拼字符串表达式，写起来就是普通的 TypeScript，能享受类型检查。
+1. **Schema 只收录高频变化的配置**，其余原生属性通过 `props` 原样透传给 ElFormItem 默认插槽中的控件，避免 Schema 无限膨胀。
+2. **动态显隐用布尔表达**：`hidden` 等价于 `v-if`（彻底移除），`visible` 等价于 `v-show`（仅隐藏样式）；需要更复杂的自定义渲染时用 `itemRender` 函数接管。
 
 ---
 
@@ -299,13 +305,13 @@ const schema: FormItemSchema<UserForm>[] = [
 <script setup lang="ts">
 import { ref } from 'vue'
 import { CkFormContainer } from 'ep-container-kit'
-import type { FormItemSchema } from 'ep-container-kit'
+import type { FormContainerItem } from 'ep-container-kit'
 
 const formData = ref({ username: '', role: '' })
 
-const schema: FormItemSchema[] = [
-  { field: 'username', label: '用户名', component: 'input' },
-  { field: 'role', label: '角色', component: 'select', options: roleOptions },
+const schema: FormContainerItem[] = [
+  { prop: 'username', label: '用户名', type: 'input', props: { placeholder: '请输入用户名' } },
+  { prop: 'role', label: '角色', type: 'select', props: { options: roleOptions } },
 ]
 
 const submit = async () => {
@@ -315,36 +321,36 @@ const submit = async () => {
 
 <template>
   <CkFormContainer
-    v-model="formData"
+    v-model:source="formData"
     :schema="schema"
     label-width="100px"
     @submit="submit"
   >
-    <!-- 插槽用于放置自定义按钮区等容器之外的扩展内容 -->
+    <!-- 提交按钮用 native-type="submit" 触发容器内的 el-form 校验与 @submit 事件 -->
     <template #actions>
-      <el-button type="primary" @click="submit">提交</el-button>
+      <el-button type="primary" native-type="submit">提交</el-button>
       <el-button @click="formData = { username: '', role: '' }">重置</el-button>
     </template>
   </CkFormContainer>
 </template>
 ```
 
-单独使用 `CkFormItem`：
+单独使用 `CkFormItem`（`v-model` 直接绑定单个值，无需传 Schema）：
 
 ```vue
-<CkFormItem v-model="formData.username" :schema="schema[0]" />
+<CkFormItem v-model="formData.username" label="用户名" type="input" />
 ```
 
 表单内控件需要的具名插槽（`prefix`、`suffix` 等）会被批量透传，直接写在 `CkFormItem` 上即可生效。
 
 ### Table
 
-`TableContainer` 只负责布局：高度计算、工具栏与分页插槽的位置。**它不直接渲染 `el-table`**，具体用原生表格还是虚拟表格，由你通过默认插槽决定。
+`CkTableContainer` 只负责布局：高度计算、工具栏与分页插槽的位置。**它不直接渲染 `el-table`**，具体用原生表格还是虚拟表格，由你通过默认插槽决定。
 
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
-import { TableContainer, TableColumn, PaginationContainer } from 'ep-container-kit'
+import { CkTableContainer, CkTableColumn, CkPaginationContainer } from 'ep-container-kit'
 
 const list = ref([])
 const loading = ref(false)
@@ -354,7 +360,7 @@ const total = ref(0)
 </script>
 
 <template>
-  <TableContainer
+  <CkTableContainer
     :loading="loading"
     :total="total"
     v-model:page="page"
@@ -368,16 +374,16 @@ const total = ref(0)
     <!-- 默认插槽：表格由使用者决定，虚拟表格同样适用 -->
     <template #default="{ height }">
       <el-table :data="list" :height="height" v-loading="loading">
-        <TableColumn prop="name" label="名称" />
-        <TableColumn prop="status" label="状态" :schema="statusColumnSchema" />
-        <TableColumn prop="createdAt" label="创建时间" sortable />
+        <CkTableColumn prop="name" label="名称" />
+        <CkTableColumn prop="status" label="状态" :schema="statusColumnSchema" />
+        <CkTableColumn prop="createdAt" label="创建时间" sortable />
       </el-table>
     </template>
 
     <template #pagination>
-      <PaginationContainer v-model:page="page" v-model:page-size="pageSize" :total="total" />
+      <CkPaginationContainer v-model:page="page" v-model:page-size="pageSize" :total="total" />
     </template>
-  </TableContainer>
+  </CkTableContainer>
 </template>
 ```
 
@@ -385,12 +391,12 @@ const total = ref(0)
 
 ### Tree
 
-`TreeContainer` 内置过滤输入框和滚动处理；`TreeSelect` 在其基础上整合分页，支持**按非叶子节点分页加载子节点**，避免一次性加载整棵树。
+`CkTreeContainer` 内置过滤输入框和滚动处理；`CkTreeSelect` 在其基础上整合分页，支持**按非叶子节点分页加载子节点**，避免一次性加载整棵树。
 
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
-import { TreeContainer } from 'ep-container-kit'
+import { CkTreeContainer } from 'ep-container-kit'
 
 const treeData = ref([])
 const props = { label: 'name', children: 'children' }
@@ -404,7 +410,7 @@ const loadNode = async (node, resolve) => {
 </script>
 
 <template>
-  <TreeContainer
+  <CkTreeContainer
     :data="treeData"
     :props="props"
     :load="loadNode"
@@ -418,7 +424,7 @@ const loadNode = async (node, resolve) => {
 作为选择器使用：
 
 ```vue
-<TreeSelect
+<CkTreeSelect
   v-model="selectedId"
   :data="treeData"
   :load="loadNode"
@@ -428,15 +434,15 @@ const loadNode = async (node, resolve) => {
 />
 ```
 
-分页组件在 `TreeSelect` 的 popper 内可以正常渲染和交互，不会出现层级或定位错乱。
+分页组件在 `CkTreeSelect` 的 popper 内可以正常渲染和交互，不会出现层级或定位错乱。
 
 ### Detail
 
-`DetailContainer` 负责键值对的整体布局，`DetailItem` 负责单条数据的展示。
+`CkDetailContainer` 负责键值对的整体布局，`CkDetailItem` 负责单条数据的展示。
 
 ```vue
 <script setup lang="ts">
-import { DetailContainer } from 'ep-container-kit'
+import { CkDetailContainer } from 'ep-container-kit'
 import type { DetailItemSchema } from 'ep-container-kit'
 
 const data = ref({ name: '张三', status: 1, createdAt: '2026-10-18' })
@@ -449,7 +455,7 @@ const schema: DetailItemSchema[] = [
 </script>
 
 <template>
-  <DetailContainer
+  <CkDetailContainer
     :schema="schema"
     :data="data"
     title="基本信息"
@@ -459,27 +465,27 @@ const schema: DetailItemSchema[] = [
 </template>
 ```
 
-单独使用 `DetailItem`：
+单独使用 `CkDetailItem`：
 
 ```vue
-<DetailItem label="状态" :value="1" dict="user_status" />
+<CkDetailItem label="状态" :value="1" dict="user_status" />
 ```
 
-`DetailItem` 会自动把字典值翻译成对应的显示文案，并对长文本做省略处理。需要完全自定义渲染时，用插槽接管：
+`CkDetailItem` 会自动把字典值翻译成对应的显示文案，并对长文本做省略处理。需要完全自定义渲染时，用插槽接管：
 
 ```vue
-<DetailItem label="状态" :value="data.status">
+<CkDetailItem label="状态" :value="data.status">
   <template #content="{ value, dictItem }">
     <el-tag :type="dictItem?.type">{{ dictItem?.label }}</el-tag>
   </template>
-</DetailItem>
+</CkDetailItem>
 ```
 
 ---
 
 ## 全局配置：字典与枚举
 
-`DetailItem` 这类组件需要把字典值（如 `1`）翻译成可读文案（如"启用"）。翻译逻辑支持**三级优先级**：
+`CkDetailItem` 这类组件需要把字典值（如 `1`）翻译成可读文案（如"启用"）。翻译逻辑支持**三级优先级**：
 
 ```text
 单个组件传入的解析方法  >  全局注入的解析方法  >  组件内置默认行为
@@ -525,7 +531,7 @@ const getDictItem = (dictType: string, value: unknown) => {
 ### 方式三：单个组件局部覆盖
 
 ```vue
-<DetailItem
+<CkDetailItem
   label="状态"
   :value="data.status"
   :dict-formatter="(value) => customMap[value] ?? '-'"
@@ -558,14 +564,14 @@ import type { DateFormatOptions } from 'ep-container-kit'
 
 ```ts
 import type {
-  FormItemSchema,
+  FormContainerItem,
   TableColumnSchema,
   DetailItemSchema,
   FormContainerProps,
 } from 'ep-container-kit'
 ```
 
-Schema 类型支持泛型，传入业务数据类型后，`field` 字段会被约束为该类型的键：
+Schema 类型支持泛型，传入业务数据类型后，`prop` 字段会被约束为该类型的键：
 
 ```ts
 interface UserForm {
@@ -573,9 +579,9 @@ interface UserForm {
   role: string
 }
 
-// field 只能填 username 或 role，写错会直接报错
-const schema: FormItemSchema<UserForm>[] = [
-  { field: 'username', label: '用户名', component: 'input' },
+// prop 只能填 username 或 role，写错会直接报错
+const schema: FormContainerItem<UserForm>[] = [
+  { prop: 'username', label: '用户名', type: 'input' },
 ]
 ```
 
@@ -587,24 +593,36 @@ const schema: FormItemSchema<UserForm>[] = [
 ep-container-kit/
 ├── packages/
 │   ├── components/
-│   │   ├── form/
-│   │   │   ├── FormContainer/
-│   │   │   ├── FormItem/
-│   │   │   └── FormItemSchema/
-│   │   ├── table/
-│   │   │   ├── TableContainer/
-│   │   │   ├── TableColumn/
-│   │   │   ├── TableColumnSchema/
-│   │   │   └── PaginationContainer/
-│   │   ├── tree/
-│   │   │   ├── TreeContainer/
-│   │   │   └── TreeSelect/
-│   │   └── detail/
-│   │       ├── DetailContainer/
-│   │       ├── DetailItem/
-│   │       └── DetailItemSchema/
+│   │   ├── form-container/
+│   │   │   ├── src/
+│   │   │   │   ├── FormContainer/
+│   │   │   │   ├── FormItem/
+│   │   │   │   └── FormItemSchema/
+│   │   │   └── index.ts
+│   │   ├── table-container/
+│   │   │   ├── src/
+│   │   │   │   ├── TableContainer/
+│   │   │   │   ├── TableColumn/
+│   │   │   │   └── TableColumnSchema/
+│   │   │   └── index.ts
+│   │   ├── pagination-container/
+│   │   │   ├── src/
+│   │   │   │   └── PaginationContainer/
+│   │   │   └── index.ts
+│   │   ├── tree-container/
+│   │   │   ├── src/
+│   │   │   │   ├── TreeContainer/
+│   │   │   │   └── TreeSelect/
+│   │   │   └── index.ts
+│   │   └── detail-container/
+│   │       ├── src/
+│   │       │   ├── DetailContainer/
+│   │       │   ├── DetailItem/
+│   │       │   └── DetailItemSchema/
+│   │       └── index.ts
+│   ├── constants/       # 常量（事件、组件前缀等）
 │   ├── styles/          # 全局样式与 CSS 变量
-│   ├── utils/           # 纯函数工具
+│   ├── utils/           # 纯函数工具（withInstall 等）
 │   └── index.ts         # 库总入口
 ├── examples/            # 本地开发调试
 ├── docs/                # 文档站点
@@ -623,7 +641,7 @@ ep-container-kit/
 
 本库所有组件都关闭了属性自动继承，并手动把属性透传给内部的 Element Plus 组件，因此 `class`、`style`、事件、原生属性都会直接作用到真正的 `el-*` 节点上，行为和直接使用 Element Plus 一致。
 
-**Q：`TableContainer` 为什么不自带表格？**
+**Q：`CkTableContainer` 为什么不自带表格？**
 
 因为表格的技术选型差异很大。把表格交给使用者通过插槽传入，你可以在原生 `el-table` 和 `el-table-v2`（虚拟滚动）之间自由切换，容器层不需要跟着改。
 
