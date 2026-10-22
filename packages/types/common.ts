@@ -1,4 +1,4 @@
-import type { AnyRecord, AnyValue } from '@ep-container-kit/types/tools.ts';
+import type { AnyValue } from '@ep-container-kit/types/tools.ts';
 
 /**
  * 基本编码项

@@ -28,5 +28,32 @@ export default defineConfigWithVueTs(
 
   ...pluginOxlint.buildFromOxlintConfigFile('.oxlintrc.json'),
 
+  {
+    name: 'vue/html-attribute-order',
+    files: ['**/*.vue'],
+    rules: {
+      // 统一 HTML 标签内属性的书写顺序，分批/分组强制
+      'vue/attributes-order': [
+        'error',
+        {
+          alphabetical: false,
+          order: [
+            'DEFINITION', // is / v-is
+            'LIST_RENDERING', // v-for
+            'CONDITIONALS', // v-if / v-else-if / v-else / v-show
+            'RENDER_MODIFIERS', // v-once / v-pre / v-memo
+            'GLOBAL', // id
+            ['UNIQUE', 'SLOT'], // ref / key / slot / v-slot
+            'TWO_WAY_BINDING', // v-model
+            'OTHER_DIRECTIVES', // 其它 v-xxx 指令
+            'OTHER_ATTR', // class / style / 普通属性
+            'EVENTS', // v-on / @click 等
+            'CONTENT', // v-text / v-html
+          ],
+        },
+      ],
+    },
+  },
+
   skipFormatting,
 )
