@@ -5,11 +5,12 @@ import {
 } from 'element-plus';
 import type { AnyRecord } from '@ep-container-kit/types';
 import type { FormItemSchemaProps } from '@ep-container-kit/components/form-container/src/form-item-schema.ts';
+import { getComponentName } from '@ep-container-kit/constants/index.ts';
 
 /**
  * 表单容器的组件名
  */
-export const COMPONENT_NAME = 'CkFormContainer';
+export const COMPONENT_NAME = getComponentName('FormContainer');
 
 /**
  * 表单容器的props

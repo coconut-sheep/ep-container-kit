@@ -62,11 +62,12 @@ import type {
 } from 'element-plus';
 import type { Arrayable } from 'element-plus/es/utils';
 import type { EmitFn, Ref, VNode } from 'vue';
+import { getComponentName } from '@ep-container-kit/constants/index.ts';
 
 /**
  * 表单项的组件名
  */
-export const COMPONENT_NAME = 'CkFormItem';
+export const COMPONENT_NAME = getComponentName('FormItem');
 
 /**
  * 组件的插槽类型

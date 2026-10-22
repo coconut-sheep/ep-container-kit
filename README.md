@@ -38,7 +38,7 @@ Element Plus 提供的是一块块"砖"：`el-form`、`el-table`、`el-tree`、`
 
 | 直接使用 Element Plus 的常见问题 | `ep-container-kit` 的处理方式 |
 | --- | --- |
-| 每个页面重复写 `label-width`、按钮区、校验触发时机 | 由 `FormContainer` 统一接管，Schema 只描述字段 |
+| 每个页面重复写 `label-width`、按钮区、校验触发时机 | 由 `CkFormContainer` 统一接管，Schema 只描述字段 |
 | 表格高度算不准，滚动条出现在错误的位置 | `TableContainer` 只负责高度计算与布局，`el-table` 由你通过插槽传入 |
 | `el-table-column` 写几十行，改一个字段要改多处 | `TableColumn` 支持单条 Schema 配置，列定义数据化 |
 | 详情页键值对布局靠手写 `el-row`/`el-col` | `DetailContainer` 提供网格布局配置，`DetailItem` 负责单条键值对 |
@@ -70,9 +70,9 @@ Element Plus 提供的是一块块"砖"：`el-form`、`el-table`、`el-tree`、`
 
 | 组件 | 说明 |
 | --- | --- |
-| `FormContainer` | `ElForm` 的轻量封装，支持直接传入 Schema 配置生成整表单 |
-| `FormItem` | `ElFormItem` 的轻量封装，支持单条 SchemaItem 配置 |
-| `FormItemSchema` | `FormItem` 的 Schema 实现与类型定义 |
+| `CkFormContainer` | `ElForm` 的轻量封装，支持直接传入 Schema 配置生成整表单 |
+| `CkFormItem` | `ElFormItem` 的轻量封装，支持单条 SchemaItem 配置 |
+| `CkFormItemSchema` | `CkFormItem` 的 Schema 实现与类型定义 |
 
 ### Table · 表格
 
@@ -147,12 +147,29 @@ app.mount('#app')
 组件与样式均支持按需引入，只引入用到的模块：
 
 ```ts
-import { FormContainer, FormItem, TableContainer, PaginationContainer } from 'ep-container-kit'
+import { CkFormContainer, CkFormItem, TableContainer, PaginationContainer } from 'ep-container-kit'
 import 'ep-container-kit/dist/form.css'
 import 'ep-container-kit/dist/table.css'
 ```
 
 配合 `unplugin-vue-components` 使用时，样式引入以构建产物中的模块化 CSS 为准。若只使用表格相关能力，就只引入 `table.css`；只使用详情页，就只引入 `detail.css`。
+
+### 按单组件注册
+
+除全量与按需批量导入外，也支持只注册 `CkFormContainer` / `CkFormItem` / `CkFormItemSchema` 中的某一个，注册名取自组件自身的 `name`（组件名统一带 `Ck` 前缀）：
+
+```ts
+import { createApp } from 'vue'
+import { CkFormContainer } from 'ep-container-kit'
+
+const app = createApp(App)
+
+// 仅注册 CkFormContainer 单个组件
+app.use(CkFormContainer)
+app.mount('#app')
+```
+
+三种方式可按需混用：**局部导入**（用得少、明确）与**按单组件注册**（模板直接就职）适合小范围使用，**`app.use(EpContainerKit)` 全量注册**适合整个项目都使用组件库的场景。
 
 ### 样式模块划分
 
@@ -160,7 +177,7 @@ import 'ep-container-kit/dist/table.css'
 
 | 模块 | 样式文件 | 覆盖的组件 |
 | --- | --- | --- |
-| Form | `ep-container-kit/dist/form.css` | `FormContainer`、`FormItem` |
+| Form | `ep-container-kit/dist/form.css` | `CkFormContainer`、`CkFormItem` |
 | Table | `ep-container-kit/dist/table.css` | `TableContainer`、`TableColumn`、`PaginationContainer` |
 | Tree | `ep-container-kit/dist/tree.css` | `TreeContainer`、`TreeSelect` |
 | Detail | `ep-container-kit/dist/detail.css` | `DetailContainer`、`DetailItem` |
@@ -230,7 +247,7 @@ export default defineConfig({
 ### 使用
 
 ```ts
-import EpContainerKit, { FormContainer } from '@ep-container-kit'
+import EpContainerKit, { CkFormContainer } from '@ep-container-kit'
 import '@ep-container-kit/styles/form.scss'
 ```
 
@@ -276,12 +293,12 @@ const schema: FormItemSchema<UserForm>[] = [
 
 ### Form
 
-`FormContainer` 接收整份 Schema 并渲染表单，`FormItem` 可以脱离容器单独使用。
+`CkFormContainer` 接收整份 Schema 并渲染表单，`CkFormItem` 可以脱离容器单独使用。
 
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
-import { FormContainer } from 'ep-container-kit'
+import { CkFormContainer } from 'ep-container-kit'
 import type { FormItemSchema } from 'ep-container-kit'
 
 const formData = ref({ username: '', role: '' })
@@ -297,7 +314,7 @@ const submit = async () => {
 </script>
 
 <template>
-  <FormContainer
+  <CkFormContainer
     v-model="formData"
     :schema="schema"
     label-width="100px"
@@ -308,17 +325,17 @@ const submit = async () => {
       <el-button type="primary" @click="submit">提交</el-button>
       <el-button @click="formData = { username: '', role: '' }">重置</el-button>
     </template>
-  </FormContainer>
+  </CkFormContainer>
 </template>
 ```
 
-单独使用 `FormItem`：
+单独使用 `CkFormItem`：
 
 ```vue
-<FormItem v-model="formData.username" :schema="schema[0]" />
+<CkFormItem v-model="formData.username" :schema="schema[0]" />
 ```
 
-表单内控件需要的具名插槽（`prefix`、`suffix` 等）会被批量透传，直接写在 `FormItem` 上即可生效。
+表单内控件需要的具名插槽（`prefix`、`suffix` 等）会被批量透传，直接写在 `CkFormItem` 上即可生效。
 
 ### Table
 
@@ -666,4 +683,3 @@ pnpm docs:dev
 本项目是基于 Element Plus 生态的第三方容器组件封装，与 Element Plus 官方团队**无任何隶属或合作关系**。项目名称中的 `ep` 为社区通用缩写，不构成对任何商标的使用主张。
 
 Element Plus 版权归其作者及贡献者所有，遵循 [MIT License](https://github.com/element-plus/element-plus/blob/dev/LICENSE)。
-
