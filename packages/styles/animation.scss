@@ -1,0 +1,70 @@
+// 水平方向折叠
+@keyframes zoom-horizontal {
+  0% {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+// 右上角收缩展开
+@keyframes zoom-right-top {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+// 从左侧收缩或展开
+.zoom-horizontal-left-enter-active {
+  transform-origin: left center;
+  animation: zoom-horizontal 0.3s linear;
+}
+.zoom-horizontal-left-leave-active {
+  transform-origin: left center;
+  animation: zoom-horizontal 0.3s reverse linear;
+}
+
+// 从右侧收缩或展开
+.zoom-horizontal-right-enter-active {
+  transform-origin: right center;
+  animation: zoom-horizontal 0.3s linear;
+}
+.zoom-horizontal-right-leave-active {
+  transform-origin: right center;
+  animation: zoom-horizontal 0.3s reverse linear;
+}
+
+// 菜单树的水平折叠动画
+@keyframes menu-tree-zoom {
+  0% {
+    width: 0;
+    opacity: 0;
+  }
+  100% {
+    width: var(--menu-tree-width);
+    opacity: 1;
+  }
+}
+.menu-tree-zoom-enter-active {
+  animation: menu-tree-zoom 0.3s linear;
+}
+.menu-tree-zoom-leave-active {
+  animation: menu-tree-zoom 0.3s reverse linear;
+}
+
+.zoom-right-top-enter-active {
+  transform-origin: right top;
+  animation: zoom-right-top 0.3s linear;
+}
+.zoom-right-top-leave-active {
+  transform-origin: right top;
+  animation: zoom-right-top 0.3s reverse linear;
+}

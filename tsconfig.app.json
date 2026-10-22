@@ -1,19 +1,16 @@
 {
   "extends": "@vue/tsconfig/tsconfig.dom.json",
-  "include": ["env.d.ts",
-    "example/**/*",
-    "example/**/*.vue"
-  ],
-  "exclude": [
-    "example/**/__tests__/*"
-  ],
+  "include": ["env.d.ts", "example/**/*", "example/**/*.vue", "packages/**/*"],
+  "exclude": ["example/**/__tests__/*"],
   "compilerOptions": {
     // Extra safety for array and object lookups, but may have false positives.
     "noUncheckedIndexedAccess": true,
 
     // Path mapping for cleaner imports.
+    // NOTE: `@` 指向 example 演示应用，须与 vite.config.ts 中的 resolve.alias 保持一致。
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./example/*"],
+      "@ep-container-kit/*": ["./packages/*"]
     },
 
     // `vue-tsc --build` produces a .tsbuildinfo file for incremental type-checking.
