@@ -4,7 +4,7 @@ import {
   type FormInstance,
 } from 'element-plus';
 import type { AnyRecord } from '@ep-container-kit/types';
-import type { FormContainerItem } from '@ep-container-kit/components/form-container/src/form-item.ts';
+import type { FormItemSchemaProps } from '@ep-container-kit/components/form-container/src/form-item-schema.ts';
 
 /**
  * 表单容器的组件名
@@ -23,8 +23,9 @@ export type FormContainerProps<T extends AnyRecord = AnyRecord> =
     vertical?: boolean;
     /**
      * 表单的Schema配置
+     * @description 类型从 FormItemSchema 的 props 中提取，保证两者一致
      */
-    schema?: FormContainerItem<T>[];
+    schema?: FormItemSchemaProps<T>['schema'];
   };
 
 /**
