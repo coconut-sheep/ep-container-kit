@@ -32,7 +32,9 @@
 </script>
 
 <template>
-  <el-config-provider v-bind="providerProps" />
+  <el-config-provider v-bind="providerProps">
+    <slot />
+  </el-config-provider>
 </template>
 
 <style scoped lang="scss"></style>

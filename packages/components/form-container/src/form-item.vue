@@ -13,6 +13,7 @@
     filterNullishProps,
     isUndefined,
     omitEntryProps,
+    toSizeValue,
   } from '@ep-container-kit/utils';
   import { FORM_PROVIDER } from '@ep-container-kit/constants';
   import {
@@ -28,6 +29,7 @@
 
   defineOptions({
     name: COMPONENT_NAME,
+    inheritAttrs: false,
   });
 
   const modelValue = defineModel<AnyValue>({
@@ -44,9 +46,10 @@
     Partial<ConfigProviderProvide<FormContainerProvideConfig>>
   >(FORM_PROVIDER, {});
 
+  const defaultProps = getComponentDefaultProps();
+
   const mergedProps = computed<FormItemProps>(() => {
     const definedProps = filterNullishProps(props);
-    const defaultProps = getComponentDefaultProps();
 
     // 上层注入的props
     const injectProps = handleInjectValue({
@@ -55,7 +58,10 @@
         {}) as FormContainerProvideConfig,
       componentValue: (definedProps.itemProps ||
         {}) as FormContainerProvideConfig,
-      propList: FORM_CONTAINER_PROVIDE_KEY_LIST,
+      propList: FORM_CONTAINER_PROVIDE_KEY_LIST.filter((key) => {
+        // vertical 仅作用于 FormContainer 布局，不传递给 FormItem
+        return !['vertical'].includes(key);
+      }),
     });
 
     return {
@@ -74,8 +80,8 @@
    */
   const formItemProps = computed(() => {
     const _class: string[] = [];
-    if (props.col) {
-      _class.push(`column-${props.col}`);
+    if (mergedProps.value.col) {
+      _class.push(`column-${mergedProps.value.col}`);
     }
 
     // el-form-item组件的props配置
@@ -88,22 +94,12 @@
       'render',
     ]);
 
-    const _defaultProps = getComponentDefaultProps();
-
     return {
       class: _class.join(' '),
       ..._formItemProps,
-      prop: handleFormItemProp(mergedProps.value, 'prop', _defaultProps.prop),
-      label: handleFormItemProp(
-        mergedProps.value,
-        'label',
-        _defaultProps.label,
-      ),
-      rules: handleFormItemProp(
-        mergedProps.value,
-        'rules',
-        _defaultProps.rules,
-      ),
+      prop: handleFormItemProp(mergedProps.value, 'prop', defaultProps.prop),
+      label: handleFormItemProp(mergedProps.value, 'label', defaultProps.label),
+      rules: handleFormItemProp(mergedProps.value, 'rules', defaultProps.rules),
     };
   });
 
@@ -114,14 +110,14 @@
     const _defaultSlots: BaseSlots = {};
 
     // 通过配置生成的默认插槽
-    const _component = createFormItemComponent(props, modelValue);
+    const _component = createFormItemComponent(mergedProps.value, modelValue);
     if (_component) {
       _defaultSlots['default'] = () => _component;
     }
 
     // 使用配置属性提供的默认插槽
-    if (props.itemSlots?.default) {
-      _defaultSlots['default'] = props.itemSlots.default;
+    if (mergedProps.value.itemSlots?.default) {
+      _defaultSlots['default'] = mergedProps.value.itemSlots.default;
     }
 
     // 使用模板语法传入的默认插槽
@@ -142,33 +138,84 @@
   });
 
   /**
+   * v-show效果实现
+   * @description visible默认值处理
+   */
+  const vShowStyle = computed<AnyRecord>(() => {
+    const _isVisible = isUndefined(mergedProps.value.visible)
+      ? true
+      : mergedProps.value.visible;
+    return _isVisible ? {} : { display: 'none' };
+  });
+
+  /**
+   * 表单项的宽度样式
+   * @description 根据itemProps.itemMinWidth/itemMaxWidth生成
+   */
+  const widthStyle = computed<AnyRecord>(() => {
+    const itemProps = mergedProps.value.itemProps;
+    const result: AnyRecord = {};
+    const minWidth = toSizeValue(itemProps?.itemMinWidth);
+    if (minWidth) {
+      result.minWidth = minWidth;
+    }
+    const maxWidth = toSizeValue(itemProps?.itemMaxWidth);
+    if (maxWidth) {
+      result.maxWidth = maxWidth;
+    }
+    return result;
+  });
+
+  /**
+   * ElFormItem的style
+   */
+  const formItemStyle = computed<AnyRecord>(() => {
+    return {
+      ...vShowStyle.value,
+      ...(formItemProps.value.itemProps?.style || {}),
+      ...widthStyle.value,
+    };
+  });
+
+  /**
+   * ElFormItem的class
+   */
+  const formItemClass = computed<string>(() => {
+    return ['form-item', formItemProps.value.class || ''].join(' ');
+  });
+
+  /**
+   * ElFormItem的插槽
+   * @description 默认插槽 + 其它插槽 + 模板传入的其它插槽
+   */
+  const formItemSlots = computed<BaseSlots>(() => {
+    // 除默认插槽之外的其他插槽
+    const otherSlots = omitEntryProps(mergedProps.value.itemSlots ?? {}, [
+      'default',
+    ]);
+    // 使用模板语法传入的其他插槽
+    const templateOtherSlots = omitEntryProps(slots, ['default']);
+    return {
+      ...defaultSlots.value,
+      ...otherSlots,
+      ...templateOtherSlots,
+    };
+  });
+
+  /**
    * 基于ElFormItem组件创建的组件
+   * @description 响应值均由上方computed在求值作用域内同步读取，此处仅做最终vnode组装
    */
   const formItemComponent = () => {
-    // 如果有提供自定义渲染函数，就使用自定义渲染函数
-    if (mergedProps.value.itemRender) {
-      return mergedProps.value.itemRender(props, modelValue);
-    }
-
     // v-if效果实现
     if (mergedProps.value.hidden) {
       return null;
     }
 
-    // visible默认值处理
-    const _isVisible = isUndefined(mergedProps.value.visible)
-      ? true
-      : mergedProps.value.visible;
-    // v-show效果实现
-    const vShowStyle = _isVisible ? {} : { display: 'none' };
-
-    // 除默认插槽之外的其他插槽
-    const otherSlots = omitEntryProps(mergedProps.value.itemSlots ?? {}, [
-      'default',
-    ]);
-
-    // 使用模板语法传入的其他插槽
-    const templateOtherSlots = omitEntryProps(slots, ['default']);
+    // 如果有提供自定义渲染函数，就使用自定义渲染函数
+    if (mergedProps.value.itemRender) {
+      return mergedProps.value.itemRender(mergedProps.value, modelValue);
+    }
 
     const _formItemProps = omitEntryProps(
       formItemProps.value as FormContainerItem,
@@ -181,17 +228,10 @@
         ...attrs,
         ..._formItemProps,
         ...(formItemProps.value.itemProps || {}),
-        style: {
-          ...vShowStyle,
-          ...(formItemProps.value.itemProps?.style || {}),
-        },
-        class: ['form-item', formItemProps.value.class || ''].join(' '),
+        style: formItemStyle.value,
+        class: formItemClass.value,
       },
-      {
-        ...defaultSlots.value,
-        ...otherSlots,
-        ...templateOtherSlots,
-      },
+      formItemSlots.value,
     );
   };
 </script>

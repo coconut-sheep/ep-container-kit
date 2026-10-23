@@ -109,12 +109,17 @@ type FormItemComponentProps<T> = Partial<
 
 /**
  * 表单项的基础Props
+ * @description 默认插槽的来源与优先级（低 → 高，高优先级覆盖低优先级）：
+ * @description 1. 内置组件：由 `type` + `props`/`slots`/`events` 自动生成的默认插槽组件
+ * @description 2. 配置插槽：`itemSlots.default`
+ * @description 3. 模板通用插槽：`slots.default`（`useSlots` 传入的默认插槽）
+ * @description 4. 模板定向插槽：`slot_${prop}`（仅当 `prop` 值有效时生效，优先级最高）
  */
 export interface FormItemBase<T extends AnyRecord = AnyRecord> {
   /**
    * 属性，表示从数据源对象的哪个属性中取值，同时用于ElFormItem的prop属性
    * @description 当该值为 falsy 或在数据源对象中不存在该属性，时，不从数据源中取值，数据由组件内部自己持有
-   * @description 当该值为 truthy 时，模板中名为 `slot_${prop}` 的插槽有效
+   * @description 当该值为 truthy 时，模板中名为 `slot_${prop}` 的插槽有效，且优先级最高，会覆盖默认插槽的其它来源
    * @description 可以被itemProps中的prop属性覆盖。
    */
   prop?: string | Extract<keyof T, string>;
@@ -149,6 +154,7 @@ export interface FormItemBase<T extends AnyRecord = AnyRecord> {
   itemProps?: ElFormItemProps & FormContainerProvideProps & AnyRecord;
   /**
    * 表单项的插槽
+   * @description 提供ElFormItem的各插槽。当未提供 `itemSlots.default`、模板 `slots.default` 或模板 `slot_${prop}` 插槽时，默认插槽由 `type` 对应的内置组件自动生成
    */
   itemSlots?: InstanceType<typeof ElFormItem>['$slots'];
   /**
@@ -472,9 +478,7 @@ export const getComponentDefaultProps = (): FormItemProps => {
     visible: true,
     hidden: false,
     rules: [],
-    itemProps: {
-      itemMinWidth: 0,
-    },
+    itemProps: {},
     itemSlots: {},
     props: {},
     slots: {},

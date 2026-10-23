@@ -10,6 +10,7 @@
     filterNullishProps,
     getRefExpose,
     isArray,
+    omitEntryProps,
   } from '@ep-container-kit/utils';
   import type { AnyRecord, EmitsToTuples } from '@ep-container-kit/types';
   import { ElForm, type FormInstance, type FormItemProp } from 'element-plus';
@@ -40,12 +41,13 @@
 
   const emits = defineEmits<EmitsToTuples<FormContainerEmits>>();
 
+  const defaultProps = getComponentDefaultProps();
+
   const _inject = inject<
     Partial<ConfigProviderProvide<FormContainerProvideConfig>>
   >(FORM_PROVIDER, {});
 
   const mergedProps = computed(() => {
-    const defaultProps = getComponentDefaultProps();
     const definedProps = filterNullishProps(props);
 
     return {
@@ -71,6 +73,19 @@
     ),
   );
 
+  /**
+   * 传递给 el-form 的 props
+   * @description 剔除 el-form 不认识的内部 key（schema / 提供配置 / vertical），避免其作为 fallthrough attribute 落到根元素
+   */
+  const formContainerProps = computed(() => {
+    return omitEntryProps(mergedProps.value, [
+      'schema',
+      'itemMinWidth',
+      'itemMaxWidth',
+      'vertical',
+    ]);
+  });
+
   const formContainerRef = useTemplateRef<FormInstance>('formContainerRef');
   const formContainerClass = computed(() => {
     const result: string[] = [];
@@ -82,7 +97,6 @@
 
     return result.join(' ');
   });
-
   const hasSchema = computed(() => {
     if (!mergedProps.value.schema) {
       return false;
@@ -100,9 +114,6 @@
     isValid: boolean,
     message: string,
   ) => {
-    if (!isValid) {
-      formContainerRef.value?.scrollToField(prop);
-    }
     emits('validate', prop, isValid, message);
   };
 
@@ -113,7 +124,7 @@
   <el-form
     ref="formContainerRef"
     class="form-container"
-    v-bind="mergedProps"
+    v-bind="formContainerProps"
     :class="formContainerClass"
     :model="sourceData"
     @submit.prevent="handleFormSubmit"

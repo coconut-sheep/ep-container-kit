@@ -4,7 +4,7 @@ import type {
   FormContainerProps,
   FormContainerProvideProps,
 } from '@ep-container-kit/components/form-container/src/form-container.ts';
-import type { AnyRecord, AnyValue } from '@ep-container-kit/types';
+import type { AnyRecord } from '@ep-container-kit/types';
 import type { ComputedRef } from 'vue';
 
 /**
@@ -20,10 +20,6 @@ export interface ConfigProviderProps extends Partial<ElConfigProviderProps> {
    * 表单容器的配置
    */
   form?: FormContainerProvideConfig;
-  /**
-   * 详情容器的配置
-   */
-  detail?: DetailContainerProvideConfig;
 }
 
 /**
@@ -49,17 +45,5 @@ export type FormContainerProvideConfig = Partial<
 /**
  * 表单容器 provide 的配置 key 列表
  */
-export const FORM_CONTAINER_PROVIDE_KEY_LIST: (keyof FormContainerProvideConfig)[] = [
-  'vertical',
-  'itemMaxWidth',
-  'itemMinWidth',
-  'labelPosition',
-  'labelWidth',
-];
-
-/**
- * 全局配置器中详情容器的配置
- */
-export interface DetailContainerProvideConfig {
-  [key: string]: AnyValue;
-}
+export const FORM_CONTAINER_PROVIDE_KEY_LIST: (keyof FormContainerProvideConfig)[] =
+  ['vertical', 'itemMaxWidth', 'itemMinWidth', 'labelPosition', 'labelWidth'];
