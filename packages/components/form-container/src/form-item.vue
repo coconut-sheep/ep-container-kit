@@ -3,12 +3,28 @@
     COMPONENT_NAME,
     type FormContainerItem,
     type FormItemProps,
+    getComponentDefaultProps,
   } from '@ep-container-kit/components/form-container/src/form-item.ts';
-  import { computed, h, useAttrs, useSlots } from 'vue';
+  import { computed, h, inject, useAttrs, useSlots } from 'vue';
   import type { AnyRecord, AnyValue, BaseSlots } from '@ep-container-kit/types';
   import { ElFormItem } from 'element-plus';
-  import { isUndefined, omitEntryProps } from '@ep-container-kit/utils';
-  import { createFormItemComponent } from '@ep-container-kit/components/form-container/src/utils.ts';
+  import {
+    defineProp,
+    filterNullishProps,
+    isUndefined,
+    omitEntryProps,
+  } from '@ep-container-kit/utils';
+  import { FORM_PROVIDER } from '@ep-container-kit/constants';
+  import {
+    FORM_CONTAINER_PROVIDE_KEY_LIST,
+    type ConfigProviderProvide,
+    type FormContainerProvideConfig,
+  } from '@ep-container-kit/components/config-provider/src/config-provider.ts';
+  import { handleInjectValue } from '@ep-container-kit/components/config-provider/src/utils.ts';
+  import {
+    createFormItemComponent,
+    handleFormItemProp,
+  } from '@ep-container-kit/components/form-container/src/utils.ts';
 
   defineOptions({
     name: COMPONENT_NAME,
@@ -19,31 +35,39 @@
     required: false,
   });
 
-  const props = withDefaults(defineProps<FormItemProps>(), {
-    visible: true,
-    hidden: false,
-    rules: () => {
-      return [];
-    },
-    itemProps: () => {
-      return {};
-    },
-    itemSlots: () => {
-      return {};
-    },
-    props: () => {
-      return {};
-    },
-    slots: () => {
-      return {};
-    },
-    events: () => {
-      return {};
-    },
-  });
+  const props = defineProps<FormItemProps>();
 
   const slots = useSlots();
   const attrs = useAttrs();
+
+  const _inject = inject<
+    Partial<ConfigProviderProvide<FormContainerProvideConfig>>
+  >(FORM_PROVIDER, {});
+
+  const mergedProps = computed<FormItemProps>(() => {
+    const definedProps = filterNullishProps(props);
+    const defaultProps = getComponentDefaultProps();
+
+    // 上层注入的props
+    const injectProps = handleInjectValue({
+      injectValue: _inject,
+      defaultValue: (defaultProps.itemProps ||
+        {}) as FormContainerProvideConfig,
+      componentValue: (definedProps.itemProps ||
+        {}) as FormContainerProvideConfig,
+      propList: FORM_CONTAINER_PROVIDE_KEY_LIST,
+    });
+
+    return {
+      ...defaultProps,
+      ...definedProps,
+      ...defineProp('itemProps', {
+        ...(defaultProps.itemProps || {}),
+        ...(definedProps.itemProps || {}),
+        ...injectProps,
+      }),
+    } as FormItemProps;
+  });
 
   /**
    * 组件使用的props配置
@@ -55,7 +79,7 @@
     }
 
     // el-form-item组件的props配置
-    const itemProps = omitEntryProps(props, [
+    const _formItemProps = omitEntryProps(mergedProps.value, [
       'type',
       'props',
       'slots',
@@ -64,11 +88,22 @@
       'render',
     ]);
 
+    const _defaultProps = getComponentDefaultProps();
+
     return {
       class: _class.join(' '),
-      ...itemProps,
-      ...(props.itemProps || {}),
-      prop: props.prop ? String(props.prop) : '',
+      ..._formItemProps,
+      prop: handleFormItemProp(mergedProps.value, 'prop', _defaultProps.prop),
+      label: handleFormItemProp(
+        mergedProps.value,
+        'label',
+        _defaultProps.label,
+      ),
+      rules: handleFormItemProp(
+        mergedProps.value,
+        'rules',
+        _defaultProps.rules,
+      ),
     };
   });
 
@@ -111,22 +146,26 @@
    */
   const formItemComponent = () => {
     // 如果有提供自定义渲染函数，就使用自定义渲染函数
-    if (props.itemRender) {
-      return props.itemRender(props, modelValue);
+    if (mergedProps.value.itemRender) {
+      return mergedProps.value.itemRender(props, modelValue);
     }
 
     // v-if效果实现
-    if (props.hidden) {
+    if (mergedProps.value.hidden) {
       return null;
     }
 
     // visible默认值处理
-    const _isVisible = isUndefined(props.visible) ? true : props.visible;
+    const _isVisible = isUndefined(mergedProps.value.visible)
+      ? true
+      : mergedProps.value.visible;
     // v-show效果实现
     const vShowStyle = _isVisible ? {} : { display: 'none' };
 
     // 除默认插槽之外的其他插槽
-    const otherSlots = omitEntryProps(props.itemSlots, ['default']);
+    const otherSlots = omitEntryProps(mergedProps.value.itemSlots ?? {}, [
+      'default',
+    ]);
 
     // 使用模板语法传入的其他插槽
     const templateOtherSlots = omitEntryProps(slots, ['default']);
@@ -141,9 +180,10 @@
       {
         ...attrs,
         ..._formItemProps,
+        ...(formItemProps.value.itemProps || {}),
         style: {
           ...vShowStyle,
-          ...(props.itemProps?.style || {}),
+          ...(formItemProps.value.itemProps?.style || {}),
         },
         class: ['form-item', formItemProps.value.class || ''].join(' '),
       },

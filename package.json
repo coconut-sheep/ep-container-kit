@@ -13,7 +13,7 @@
     "lint": "run-s \"lint:*\"",
     "lint:oxlint": "oxlint . --fix",
     "lint:eslint": "eslint . --fix --cache",
-    "format": "prettier --write --experimental-cli example/"
+    "format": "prettier --write --experimental-cli ."
   },
   "dependencies": {
     "element-plus": "^2.14.7",

@@ -1,16 +1,16 @@
 import type { App, Plugin } from 'vue';
-import { components } from './components/index.ts';
-import { installComponents } from './utils/index.ts';
+import { components } from './components';
+import { installComponents } from './utils';
 
 // 组件及类型（局部导入入口）
-export * from './components/index.ts';
+export * from './components';
 
 // 工具函数与常量（如 withInstall、toSizeValue 等）
-export * from './utils/index.ts';
-export * from './constants/index.ts';
+export * from './utils';
+export * from './constants';
 
 // 公共类型
-export * from './types/index.ts';
+export * from './types';
 
 /**
  * 全局注册所有组件

@@ -277,7 +277,7 @@ $valueMaxRange: calc($valueMaxLimit / $space);
 
 .required {
   &::before {
-    content: "*";
+    content: '*';
     color: #ff0000;
     display: flex;
     overflow: hidden;
@@ -338,7 +338,7 @@ $valueMaxRange: calc($valueMaxLimit / $space);
     display: flex;
     width: 4px;
     height: 1.2em;
-    content: "";
+    content: '';
     background-color: var(--primary-color);
     margin: auto 5px auto 0;
   }

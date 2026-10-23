@@ -1,10 +1,10 @@
-export * from './form-container/index.ts';
+export * from './form-container';
 
 import {
   CkFormContainer,
   CkFormItem,
   CkFormItemSchema,
-} from './form-container/index.ts';
+} from './form-container';
 
 /**
  * 组件库所有组件列表

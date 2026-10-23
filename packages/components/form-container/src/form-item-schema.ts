@@ -16,3 +16,12 @@ export type FormItemSchemaProps<T extends AnyRecord = AnyRecord> = {
    */
   schema: FormContainerItem<T>[];
 };
+
+/**
+ * FormItemSchema的props默认值
+ */
+export const COMPONENT_DEFAULT_PROPS = {
+  schema: (): FormContainerItem[] => {
+    return [];
+  },
+};

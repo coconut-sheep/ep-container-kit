@@ -1,11 +1,8 @@
 <script setup lang="ts" generic="T extends AnyRecord = AnyRecord">
-  import type {
-    AnyRecord,
-    AnyValue,
-    BaseSlots,
-  } from '@ep-container-kit/types/index.ts';
+  import type { AnyRecord, AnyValue, BaseSlots } from '@ep-container-kit/types';
   import {
     COMPONENT_NAME,
+    COMPONENT_DEFAULT_PROPS,
     type FormItemSchemaProps,
   } from '@ep-container-kit/components/form-container/src/form-item-schema.ts';
   import {
@@ -18,6 +15,7 @@
   } from 'vue';
   import { omitEntryProps } from '@ep-container-kit/utils';
   import FormItem from '@ep-container-kit/components/form-container/src/form-item.vue';
+  import { handleFormItemProp } from '@ep-container-kit/components/form-container/src/utils.ts';
 
   defineOptions({
     name: COMPONENT_NAME,
@@ -31,11 +29,10 @@
     },
   });
 
-  const props = withDefaults(defineProps<FormItemSchemaProps<T>>(), {
-    schema: () => {
-      return [];
-    },
-  });
+  const props = withDefaults(
+    defineProps<FormItemSchemaProps<T>>(),
+    COMPONENT_DEFAULT_PROPS,
+  );
 
   const slots = useSlots();
 
@@ -73,8 +70,9 @@
     (list) => {
       const activeKeys = new Set<string>();
       for (const item of list) {
-        if (item.prop) {
-          activeKeys.add(String(item.prop));
+        const _propKey = handleFormItemProp(item, 'prop', '') as string;
+        if (_propKey) {
+          activeKeys.add(_propKey);
         }
       }
       for (const cacheKey of modelCache.keys()) {
@@ -87,13 +85,15 @@
 
   const renderContent = () => {
     return props.schema.map((item, index) => {
+      const _propKey = handleFormItemProp(item, 'prop', '') as string;
+
       // v-model处理
-      const modelRef = _createPropModel(item.prop);
+      const modelRef = _createPropModel(_propKey);
 
       // 默认插槽处理，支持按索引命名的插槽
       const defaultSlots: BaseSlots = {};
-      const defaultSlotName = `slot_${item.prop}`;
-      if (item.prop) {
+      const defaultSlotName = `slot_${_propKey}`;
+      if (_propKey) {
         if (slots[defaultSlotName]) {
           defaultSlots['default'] = slots[defaultSlotName];
         }
@@ -102,7 +102,7 @@
       return h(
         FormItem,
         {
-          key: item.prop || index,
+          key: _propKey || index,
           ...item,
           modelValue: modelRef.value,
           'onUpdate:modelValue': (val: AnyValue) => {

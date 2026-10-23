@@ -1,6 +1,7 @@
 import type {
   AnyRecord,
   AnyValue,
+  Arrayable,
   BaseComponent,
   BaseEvents,
   BaseProps,
@@ -60,9 +61,9 @@ import type {
   CascaderProps as ElCascaderProps,
   CascaderEmits as ElCascaderEmits,
 } from 'element-plus';
-import type { Arrayable } from 'element-plus/es/utils';
 import type { EmitFn, Ref, VNode } from 'vue';
-import { getComponentName } from '@ep-container-kit/constants/index.ts';
+import { getComponentName } from '@ep-container-kit/constants';
+import type { FormContainerProvideProps } from '@ep-container-kit/components/form-container/src/form-container.ts';
 
 /**
  * 表单项的组件名
@@ -145,7 +146,7 @@ export interface FormItemBase<T extends AnyRecord = AnyRecord> {
   /**
    * ElFormItem的属性，包括props与attrs（自定义属性）
    */
-  itemProps?: ElFormItemProps & AnyRecord;
+  itemProps?: ElFormItemProps & FormContainerProvideProps & AnyRecord;
   /**
    * 表单项的插槽
    */
@@ -462,3 +463,21 @@ export type FormContainerItem<T extends AnyRecord = AnyRecord> =
  */
 export type FormItemProps<T extends AnyRecord = AnyRecord> =
   FormContainerItem<T>;
+
+/**
+ * 表单项Props的默认值
+ */
+export const getComponentDefaultProps = (): FormItemProps => {
+  return {
+    visible: true,
+    hidden: false,
+    rules: [],
+    itemProps: {
+      itemMinWidth: 0,
+    },
+    itemSlots: {},
+    props: {},
+    slots: {},
+    events: {},
+  };
+};

@@ -138,9 +138,17 @@ export const isSizeValue = (value: string): value is string => {
  * ```
  */
 export const toSizeValue = (value: AnyValue, unit: string = 'px'): string => {
+  // 尝试将值转换为数字
+  const _value = Number(value);
+
   // 有效数字：直接拼接单位
-  if (isNumber(value)) {
-    return `${value}${unit}`;
+  if (isNumber(_value)) {
+    // 检查是否为负数
+    if (_value < 0) {
+      return '';
+    }
+
+    return `${_value}${unit}`;
   }
 
   // 有效尺寸字符串：直接返回

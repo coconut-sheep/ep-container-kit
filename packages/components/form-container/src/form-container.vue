@@ -1,32 +1,34 @@
 <script setup lang="ts" generic="T extends AnyRecord = AnyRecord">
   import {
     COMPONENT_NAME,
+    getComponentDefaultProps,
     type FormContainerEmits,
-    type FormContainerInstance,
     type FormContainerProps,
   } from '@ep-container-kit/components/form-container/src/form-container.ts';
-  import { computed, useTemplateRef } from 'vue';
+  import { computed, inject, provide, useTemplateRef } from 'vue';
   import {
-    getPropsDefaultValue,
+    filterNullishProps,
     getRefExpose,
     isArray,
   } from '@ep-container-kit/utils';
   import type { AnyRecord, EmitsToTuples } from '@ep-container-kit/types';
-  import { ElForm, type FormItemProp } from 'element-plus';
+  import { ElForm, type FormInstance, type FormItemProp } from 'element-plus';
   import FormItemSchema from '@ep-container-kit/components/form-container/src/form-item-schema.vue';
+  import { FORM_PROVIDER } from '@ep-container-kit/constants';
+  import {
+    FORM_CONTAINER_PROVIDE_KEY_LIST,
+    type ConfigProviderProvide,
+    type FormContainerProvideConfig,
+  } from '@ep-container-kit/components/config-provider/src/config-provider.ts';
+  import {
+    handleInjectValue,
+    handleProvideValue,
+  } from '@ep-container-kit/components/config-provider/src/utils.ts';
 
   defineOptions({
     name: COMPONENT_NAME,
   });
 
-  const props = withDefaults(defineProps<FormContainerProps<T>>(), {
-    ...getPropsDefaultValue(ElForm.props),
-    vertical: false,
-  });
-
-  const emits = defineEmits<EmitsToTuples<FormContainerEmits>>();
-
-  // schema 渲染时的数据源
   const sourceData = defineModel<T>('source', {
     required: false,
     default: () => {
@@ -34,12 +36,45 @@
     },
   });
 
-  const formContainerRef =
-    useTemplateRef<FormContainerInstance>('formContainerRef');
+  const props = defineProps<FormContainerProps<T>>();
 
+  const emits = defineEmits<EmitsToTuples<FormContainerEmits>>();
+
+  const _inject = inject<
+    Partial<ConfigProviderProvide<FormContainerProvideConfig>>
+  >(FORM_PROVIDER, {});
+
+  const mergedProps = computed(() => {
+    const defaultProps = getComponentDefaultProps();
+    const definedProps = filterNullishProps(props);
+
+    return {
+      ...defaultProps,
+      ...definedProps,
+      ...handleInjectValue({
+        injectValue: _inject,
+        defaultValue: defaultProps,
+        componentValue: definedProps,
+        propList: FORM_CONTAINER_PROVIDE_KEY_LIST,
+      }),
+    };
+  });
+
+  /**
+   * 将合并后的表单配置继续提供给下层组件
+   */
+  provide(
+    FORM_PROVIDER,
+    handleProvideValue(
+      () => mergedProps.value,
+      FORM_CONTAINER_PROVIDE_KEY_LIST,
+    ),
+  );
+
+  const formContainerRef = useTemplateRef<FormInstance>('formContainerRef');
   const formContainerClass = computed(() => {
     const result: string[] = [];
-    if (props.vertical) {
+    if (mergedProps.value.vertical) {
       result.push('form-container--vertical');
     } else {
       result.push('form-container--horizontal');
@@ -48,8 +83,13 @@
     return result.join(' ');
   });
 
-  // 是否以 schema 方式渲染
-  const hasSchema = computed(() => props.schema && isArray(props.schema));
+  const hasSchema = computed(() => {
+    if (!mergedProps.value.schema) {
+      return false;
+    }
+
+    return isArray(mergedProps.value.schema);
+  });
 
   const handleFormSubmit = () => {
     emits('submit');
@@ -73,15 +113,18 @@
   <el-form
     ref="formContainerRef"
     class="form-container"
-    v-bind="props"
+    v-bind="mergedProps"
     :class="formContainerClass"
     :model="sourceData"
     @submit.prevent="handleFormSubmit"
     @validate="handleFormValidate"
   >
-    <!-- schema 模式：委托给 FormItemSchema 渲染 -->
-    <template v-if="hasSchema">
-      <FormItemSchema v-model:source="sourceData" :schema="props.schema!">
+    <slot>
+      <FormItemSchema
+        v-if="hasSchema"
+        v-model:source="sourceData"
+        :schema="mergedProps.schema!"
+      >
         <template
           v-for="(slotFn, slotName) in $slots"
           :key="slotName"
@@ -90,10 +133,7 @@
           <Component :is="slotFn" v-bind="scope" />
         </template>
       </FormItemSchema>
-    </template>
-
-    <!-- 默认插槽模式 -->
-    <slot v-else />
+    </slot>
   </el-form>
 </template>
 

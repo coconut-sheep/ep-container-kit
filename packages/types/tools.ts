@@ -87,6 +87,17 @@ export type ValueOfRecord<T> = T[keyof T];
 export type ValueOfArray<T extends AnyArray> = T[number];
 
 /**
+ * 用于将一个类型转换为数组类型，或保持其原始类型
+ * @template T 要转换的类型
+ * @example
+ * ```ts
+ * type type1 = Arrayable<number>; // number | number[]
+ * type type2 = Arrayable<{ prop1: number }>; // { prop1: number } | { prop1: number }[]
+ * ```
+ */
+export type Arrayable<T> = T | T[];
+
+/**
  * 用于从一个对象中提取去所有函数类型的属性，将这些属性聚合成一个新的对象类型
  * @example
  * ```ts

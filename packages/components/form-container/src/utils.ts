@@ -19,8 +19,7 @@ import {
   ElTimeSelect,
   ElTreeSelect,
 } from 'element-plus';
-import type { AnyRecord, AnyValue } from '@ep-container-kit/types';
-import type { Arrayable } from 'element-plus/es/utils';
+import type { AnyRecord, AnyValue, Arrayable } from '@ep-container-kit/types';
 import type { FormContainerItem } from '@ep-container-kit/components/form-container/src/form-item.ts';
 import { isArray } from '@ep-container-kit/utils';
 
@@ -223,4 +222,27 @@ export const createFormItemComponent = <T extends AnyRecord>(
   }
 
   return callback(props, value);
+};
+
+/**
+ * 处理FormItem的同名props属性，优先级为 itemProps > item > 默认值
+ * @param value FormContainerItem
+ * @param prop props属性名
+ * @param defaultValue 默认值，缺省时取不到属性则返回 undefined
+ * @example
+ * ```ts
+ * const item = { prop: 'a', itemProps: { prop: 'b', label: 'c' } };
+ * handleFormItemProp(item, 'prop');   // 'b'，itemProps覆盖item的同名属性
+ * handleFormItemProp(item, 'label');  // 'c'
+ * handleFormItemProp(item, 'rules');  // undefined，两者都没有则返回默认值/undefined
+ * ```
+ */
+export const handleFormItemProp = <
+  K extends keyof Pick<FormContainerItem, 'prop' | 'label' | 'rules'>,
+>(
+  value: FormContainerItem,
+  prop: K,
+  defaultValue?: FormContainerItem[K],
+) => {
+  return value.itemProps?.[prop] ?? value[prop] ?? defaultValue;
 };

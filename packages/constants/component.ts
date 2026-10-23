@@ -12,5 +12,6 @@ export const CONTAINER_PREFIX = 'Ck' as const;
  * getComponentName('FormContainer'); // 'CkFormContainer'
  * ```
  */
-export const getComponentName = (name: string) =>
-  `${CONTAINER_PREFIX}${name}`;
+export const getComponentName = (name: string) => {
+  return `${CONTAINER_PREFIX}${name}`;
+};
