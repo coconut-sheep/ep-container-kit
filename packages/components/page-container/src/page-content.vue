@@ -1,7 +1,5 @@
 <script setup lang="ts">
   import { computed, type CSSProperties } from 'vue';
-  import { ElIcon } from 'element-plus';
-  import { ArrowLeft } from '@element-plus/icons-vue';
   import { toSizeValue } from '@ep-container-kit/utils';
   import {
     COMPONENT_DEFAULT_PROPS,
@@ -68,15 +66,19 @@
           @click="handleBackClick"
           @keydown.enter="handleBackClick"
         >
-          <!--
-            图标默认走 Element Plus 官方图标，与 ElButton 等组件的观感统一；
-            `back-icon` 插槽可整体接管，用于替换为自定义 SVG 或其他图标集
-          -->
-          <slot name="back-icon">
-            <ElIcon aria-hidden="true">
-              <ArrowLeft />
-            </ElIcon>
-          </slot>
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
         </span>
         <span class="header-title-text">{{ title }}</span>
       </div>
@@ -92,9 +94,6 @@
   .page-content {
     display: flex;
     flex-direction: column;
-    // `height: 100%` 与 `padding: 18px` 并存，必须是 border-box 才不会溢出父级。
-    // 组件库不做全局 reset，这个尺寸前提由组件自己在 scoped 样式里声明
-    box-sizing: border-box;
     width: 100%;
     padding: 18px;
     row-gap: 14px;
@@ -104,15 +103,13 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      // `min-height` 需包含 padding 与 border，否则 52px 会变成 70px
-      box-sizing: border-box;
       min-width: 0;
       min-height: 52px;
       padding: 8px 10px;
       column-gap: 12px;
       border: 1px solid var(--el-border-color-lighter, #ebeef5);
       border-radius: 8px;
-      // 纯色底 + 细边框：用实色表面表达层级，不叠加模糊与半透明蒙层
+      // 纯色底 + 细边框，去掉原先的半透明蒙层与 backdrop-filter 玻璃效果
       background: var(--el-bg-color, #ffffff);
 
       .header-title {

@@ -15,26 +15,10 @@ describe('CkPageContent', () => {
 
     expect(wrapper.find('.page-content-header').exists()).toBe(true);
     expect(wrapper.find('.header-title-text').text()).toBe('资产详情');
-    // 默认使用 Element Plus 的 ElIcon 渲染返回图标
-    expect(wrapper.find('.header-back .el-icon').exists()).toBe(true);
 
     await wrapper.find('.header-back').trigger('click');
 
     expect(onBackClick).toHaveBeenCalledTimes(1);
-  });
-
-  it('back-icon 插槽可整体接管返回图标', () => {
-    const wrapper = mount(CkPageContent, {
-      props: { title: '标题', showBack: true },
-      slots: {
-        default: bodySlot,
-        'back-icon': () => h('span', { class: 'custom-icon' }, '←'),
-      },
-    });
-
-    expect(wrapper.find('.custom-icon').exists()).toBe(true);
-    // 插槽存在时不再渲染默认的 ElIcon
-    expect(wrapper.find('.header-back .el-icon').exists()).toBe(false);
   });
 
   it('无 title / showBack / header 插槽时不渲染头部', () => {

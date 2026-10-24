@@ -43,7 +43,6 @@
     "prepublishOnly": "pnpm build"
   },
   "peerDependencies": {
-    "@element-plus/icons-vue": "^2.3.0",
     "element-plus": "^2.7.0",
     "vue": "^3.4.0"
   },
@@ -53,7 +52,6 @@
     "@ep-container-kit/styles": "workspace:*",
     "@ep-container-kit/types": "workspace:*",
     "@ep-container-kit/utils": "workspace:*",
-    "@element-plus/icons-vue": "^2.3.2",
     "@microsoft/api-extractor": "^7.59.4",
     "@vitejs/plugin-vue": "^6.0.8",
     "@vitejs/plugin-vue-jsx": "^5.1.6",

@@ -1,10 +1,9 @@
-// 布局工具类与过渡动画，构建时抽取为 dist/index.css。
-// 不包含全局重置：库不改变宿主的 `box-sizing`、字体、背景与滚动行为
-import '@ep-container-kit/styles/index.scss';
-
 import type { App, Plugin } from 'vue';
 import { components } from '@ep-container-kit/components';
 import { installComponents } from '@ep-container-kit/utils';
+
+// 全局工具类与动画样式，构建时会被抽取到 dist/index.css
+import '@ep-container-kit/styles/index.scss';
 
 // 组件与组件类型（局部按需导入入口）
 export * from '@ep-container-kit/components';

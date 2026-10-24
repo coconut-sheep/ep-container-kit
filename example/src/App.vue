@@ -23,7 +23,7 @@
 </template>
 
 <style lang="scss">
-  // 组件库不做全局重置，页面基准样式由宿主声明
+  // example 的全局重置：组件库本身不带 reset，由宿主负责
   html,
   body {
     height: 100%;
