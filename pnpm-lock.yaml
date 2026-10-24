@@ -65,6 +65,9 @@ importers:
 
   example:
     dependencies:
+      '@element-plus/icons-vue':
+        specifier: ^2.3.2
+        version: 2.3.2(vue@3.5.44(typescript@6.0.3))
       element-plus:
         specifier: ^2.14.7
         version: 2.14.7(vue@3.5.44(typescript@6.0.3))
@@ -114,6 +117,9 @@ importers:
 
   packages/components:
     dependencies:
+      '@element-plus/icons-vue':
+        specifier: ^2.3.0
+        version: 2.3.2(vue@3.5.44(typescript@6.0.3))
       '@ep-container-kit/constants':
         specifier: workspace:*
         version: link:../constants
@@ -141,6 +147,9 @@ importers:
 
   packages/ep-container-kit:
     devDependencies:
+      '@element-plus/icons-vue':
+        specifier: ^2.3.2
+        version: 2.3.2(vue@3.5.44(typescript@6.0.3))
       '@ep-container-kit/components':
         specifier: workspace:*
         version: link:../components

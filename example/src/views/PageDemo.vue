@@ -4,12 +4,15 @@
     ElButton,
     ElDescriptions,
     ElDescriptionsItem,
+    ElIcon,
     ElInput,
     ElMessage,
+    ElSwitch,
     ElTable,
     ElTableColumn,
     ElTag,
   } from 'element-plus';
+  import { Back } from '@element-plus/icons-vue';
   import { CkPageContainer, CkPageContent } from 'ep-container-kit';
 
   type Asset = {
@@ -29,6 +32,8 @@
   const keyword = ref('');
   /** 当前查看的资产；为 null 时展示列表页 */
   const current = ref<Asset | null>(null);
+  /** 是否用 back-icon 插槽替换默认返回图标（默认图标是 Element Plus 的 ArrowLeft） */
+  const useCustomBackIcon = ref(false);
 
   const filteredAssets = computed(() => {
     const key = keyword.value.trim();
@@ -111,9 +116,21 @@
     >
       <template #header>
         <div class="page-demo__toolbar">
+          <label class="page-demo__switch">
+            自定义返回图标
+            <ElSwitch v-model="useCustomBackIcon" />
+          </label>
           <ElButton @click="handleBack">返回列表</ElButton>
           <ElButton type="primary" @click="handleSave">保存</ElButton>
         </div>
+      </template>
+
+      <!--
+        back-icon 插槽存在时整体接管返回图标；
+        默认不传，由组件渲染 Element Plus 的 ArrowLeft
+      -->
+      <template v-if="useCustomBackIcon" #back-icon>
+        <ElIcon><Back /></ElIcon>
       </template>
 
       <ElDescriptions :column="2" border>
@@ -144,6 +161,15 @@
 
     &__table {
       width: 100%;
+    }
+
+    &__switch {
+      display: inline-flex;
+      align-items: center;
+      column-gap: 6px;
+      font-size: 13px;
+      color: var(--el-text-color-regular);
+      cursor: pointer;
     }
 
     &__tip {

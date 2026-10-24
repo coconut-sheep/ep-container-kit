@@ -10,14 +10,21 @@
 
 ```bash
 # npm
-npm install ep-container-kit
+npm install ep-container-kit @element-plus/icons-vue
 # pnpm
-pnpm add ep-container-kit
+pnpm add ep-container-kit @element-plus/icons-vue
 # yarn
-yarn add ep-container-kit
+yarn add ep-container-kit @element-plus/icons-vue
 ```
 
-对等依赖：`vue >= 3.4`、`element-plus >= 2.7`，需自行安装并引入 Element Plus 的样式。
+对等依赖：`vue >= 3.4`、`element-plus >= 2.7`、`@element-plus/icons-vue >= 2.3`，需自行安装并引入 Element Plus 的样式。
+
+> `@element-plus/icons-vue` 虽然是 Element Plus 自身的依赖，但 pnpm 不会把它提升到宿主的
+> `node_modules` 顶层，不装会在加载本包时抛 `ERR_MODULE_NOT_FOUND`。
+
+`dist/index.css` 不含全局重置：没有 `*` / `html` / `body` 规则，只声明组件类名下的样式。
+请自行确保项目里有 `* { box-sizing: border-box }`（多数项目本来就有），否则布局工具类的
+百分比宽度叠加 `padding` 会溢出容器。
 
 ## 快速开始
 
@@ -85,7 +92,7 @@ import 'ep-container-kit/dist/index.css';
 
 <template>
   <CkPageContainer>
-    <CkPageContent title="资产列表">
+    <CkPageContent title="资产列表" show-back>
       <template #header>
         <el-button type="primary">新建</el-button>
       </template>
@@ -94,6 +101,8 @@ import 'ep-container-kit/dist/index.css';
   </CkPageContainer>
 </template>
 ```
+
+返回按钮图标默认使用 Element Plus 的 `ArrowLeft`，`#back-icon` 插槽可整体替换。
 
 页面容器依赖父级存在确定高度（`height: 100%` 才有参照），样式只使用 Element Plus 主题变量，不含玻璃拟态效果。
 
@@ -106,7 +115,7 @@ import 'ep-container-kit/dist/index.css';
 | `dist/index.d.ts` | 类型声明（单文件，已内联全部内部类型） |
 | `dist/index.css`  | 样式（含组件样式与布局工具类）         |
 
-`vue` 与 `element-plus` 不打入产物，由使用方提供。
+`vue`、`element-plus` 与 `@element-plus/icons-vue` 不打入产物，由使用方提供。
 
 ## 许可证
 
