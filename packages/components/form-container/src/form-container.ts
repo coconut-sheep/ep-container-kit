@@ -1,11 +1,14 @@
 import {
   ElForm,
   type FormProps,
-  type FormEmits,
   type FormInstance,
+  type FormItemProp,
 } from 'element-plus';
-import type { AnyRecord } from '@ep-container-kit/types';
-import type { FormItemSchemaProps } from '@ep-container-kit/components/form-container/src/form-item-schema.ts';
+import type {
+  AnyRecord,
+  FormContainerProvideConfig,
+} from '@ep-container-kit/types';
+import type { FormItemSchemaProps } from './form-item-schema';
 import { getComponentName } from '@ep-container-kit/constants';
 import { getPropsDefaultValue } from '@ep-container-kit/utils';
 
@@ -15,25 +18,21 @@ import { getPropsDefaultValue } from '@ep-container-kit/utils';
 export const COMPONENT_NAME = getComponentName('FormContainer');
 
 /**
- * 表单容器的props
+ * 表单容器的 props
+ * @description 在 ElForm 的 props 基础上，追加垂直布局、Schema 以及可被全局下发的尺寸配置
  */
 export type FormContainerProps<T extends AnyRecord = AnyRecord> =
   Partial<FormProps> &
-    FormContainerProvideProps & {
+    FormContainerProvideConfig & {
       /**
-       * 元素是否垂直布局 只影响直接子元素的排列方式，与原生的inline属性不同
-       * @default false
-       */
-      vertical?: boolean;
-      /**
-       * 表单的Schema配置
+       * 表单的 Schema 配置
        * @description 类型从 FormItemSchema 的 props 中提取，保证两者一致
        */
       schema?: FormItemSchemaProps<T>['schema'];
     };
 
 /**
- * 表单容器的props默认值
+ * 表单容器的 props 默认值
  */
 export const getComponentDefaultProps = (): FormContainerProps => {
   return {
@@ -44,30 +43,22 @@ export const getComponentDefaultProps = (): FormContainerProps => {
 
 /**
  * 表单容器的事件
+ * @description 使用「事件名 → 参数元组」的写法，可直接作为 `defineEmits` 的类型参数。
+ * 不能用「函数签名 + 映射类型转换」的写法：`EmitsToTuples` 是映射类型，
+ * @vue/compiler-sfc 在构建期无法解析，会直接抛错。
  */
-export type FormContainerEmits = FormEmits & {
+export type FormContainerEmits = {
   /**
    * 表单提交事件
    */
-  submit: () => void;
+  submit: [];
+  /**
+   * 表单校验事件，透传 el-form 的 validate
+   */
+  validate: [prop: FormItemProp, isValid: boolean, message: string];
 };
 
 /**
  * 表单容器实例
  */
 export type FormContainerInstance = FormInstance;
-
-/**
- * 表单容器提供的provide props
- */
-export interface FormContainerProvideProps {
-  /**
-   * 表单项最小宽度
-   * @default 0
-   */
-  itemMinWidth?: string | number;
-  /**
-   * 表单项最大宽度
-   */
-  itemMaxWidth?: string | number;
-}

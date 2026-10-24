@@ -20,7 +20,7 @@ import {
   ElTreeSelect,
 } from 'element-plus';
 import type { AnyRecord, AnyValue, Arrayable } from '@ep-container-kit/types';
-import type { FormContainerItem } from '@ep-container-kit/components/form-container/src/form-item.ts';
+import type { FormContainerItem } from './form-item';
 import { isArray } from '@ep-container-kit/utils';
 
 type FormItemMapValue = <T extends AnyRecord>(
@@ -200,7 +200,7 @@ const _createComponent = <T extends AnyRecord>(
       'onUpdate:modelValue': (value: AnyValue) => {
         valueRef.value = value;
       },
-      ...(props.props || {}),
+      ...props.props,
       ...eventProp,
     },
     slots,

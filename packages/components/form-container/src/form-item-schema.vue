@@ -4,11 +4,27 @@
     COMPONENT_NAME,
     COMPONENT_DEFAULT_PROPS,
     type FormItemSchemaProps,
-  } from '@ep-container-kit/components/form-container/src/form-item-schema.ts';
-  import { computed, h, ref, useSlots, watch, type WritableComputedRef } from 'vue';
+  } from './form-item-schema';
+  import {
+    computed,
+    h,
+    ref,
+    useSlots,
+    watch,
+    type Component,
+    type PropType,
+    type WritableComputedRef,
+  } from 'vue';
   import { hasProp, omitEntryProps } from '@ep-container-kit/utils';
-  import FormItem from '@ep-container-kit/components/form-container/src/form-item.vue';
-  import { handleFormItemProp } from '@ep-container-kit/components/form-container/src/utils.ts';
+  import FormItem from './form-item.vue';
+  import { handleFormItemProp } from './utils';
+
+  /**
+   * FormItem 使用运行时 props 声明，其 props 已被收窄为具体对象；
+   * 而这里传入的是 20 个成员的判别联合，直接 `h(FormItem, ...)` 无法匹配重载。
+   * 统一按「动态组件」处理，props 交由运行时 props 校验。
+   */
+  const DynamicFormItem = FormItem as unknown as Component;
 
   defineOptions({
     name: COMPONENT_NAME,
@@ -22,10 +38,20 @@
     },
   });
 
-  const props = withDefaults(
-    defineProps<FormItemSchemaProps<T>>(),
-    COMPONENT_DEFAULT_PROPS,
-  );
+  /**
+   * 运行时 props 声明
+   * @description `FormItemSchemaProps<T>['schema']` 是 `FormContainerItem<T>[]`，
+   * 即 20 个成员的判别联合。若直接写 `defineProps<FormItemSchemaProps<T>>()`，
+   * @vue/compiler-sfc 在构建期解析该联合时会无限递归。
+   * 这里用 `PropType` 只保留编译期类型、运行时仍声明为 Array，
+   * 同时 default 复用 `COMPONENT_DEFAULT_PROPS`，避免两处默认值漂移。
+   */
+  const props = defineProps({
+    schema: {
+      type: Array as PropType<FormItemSchemaProps<T>['schema']>,
+      default: COMPONENT_DEFAULT_PROPS.schema,
+    },
+  });
 
   const slots = useSlots();
 
@@ -115,7 +141,7 @@
       }
 
       return h(
-        FormItem,
+        DynamicFormItem,
         {
           key: _propKey || index,
           ...item,

@@ -1,3 +1,4 @@
-export * from '@ep-container-kit/types/common.ts';
-export * from '@ep-container-kit/types/tools.ts';
-export * from '@ep-container-kit/types/base.ts';
+export * from './common';
+export * from './tools';
+export * from './base';
+export * from './provide';

@@ -1,0 +1,20 @@
+{
+  "name": "@ep-container-kit/constants",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ep-container-kit 的常量与 InjectionKey 定义",
+  "main": "index.ts",
+  "module": "index.ts",
+  "types": "index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./*": "./*"
+  },
+  "dependencies": {
+    "@ep-container-kit/types": "workspace:*"
+  },
+  "peerDependencies": {
+    "vue": "^3.4.0"
+  }
+}

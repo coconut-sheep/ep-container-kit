@@ -1,5 +1,5 @@
 import type { AnyRecord } from '@ep-container-kit/types';
-import { isNull, isUndefined } from '@ep-container-kit/utils/types.ts';
+import { isNull, isUndefined } from './types';
 
 /**
  * 选择源对象中指定的键，返回新对象。

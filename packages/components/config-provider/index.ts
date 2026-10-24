@@ -9,6 +9,6 @@ export {
   type ConfigProviderProps,
   type ConfigProviderProvide,
   type FormContainerProvideConfig,
-} from './src/config-provider.ts';
+} from './src/config-provider';
 
 export default CkConfigProvider;

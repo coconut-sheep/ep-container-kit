@@ -1,3 +1,3 @@
-export * from '@ep-container-kit/constants/event.ts';
-export * from '@ep-container-kit/constants/component.ts';
-export * from '@ep-container-kit/constants/provide.ts';
+export * from './event';
+export * from './component';
+export * from './provide';

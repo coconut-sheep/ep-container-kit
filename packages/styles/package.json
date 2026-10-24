@@ -1,0 +1,13 @@
+{
+  "name": "@ep-container-kit/styles",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ep-container-kit 的全局样式（工具类、动画）",
+  "main": "index.scss",
+  "style": "index.scss",
+  "exports": {
+    ".": "./index.scss",
+    "./*": "./*"
+  }
+}

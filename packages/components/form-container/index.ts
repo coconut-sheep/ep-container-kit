@@ -16,7 +16,7 @@ export {
   type FormContainerEmits,
   type FormContainerInstance,
   type FormContainerProps,
-} from './src/form-container.ts';
+} from './src/form-container';
 
 export {
   type FormItemAny,
@@ -42,8 +42,8 @@ export {
   type FormItemTimeSelect,
   type FormItemTreeSelect,
   type FormContainerItem,
-} from './src/form-item.ts';
+} from './src/form-item';
 
-export type { FormItemSchemaProps } from './src/form-item-schema.ts';
+export type { FormItemSchemaProps } from './src/form-item-schema';
 
 export default CkFormContainer;

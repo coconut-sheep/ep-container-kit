@@ -1,0 +1,64 @@
+{
+  "name": "ep-container-kit",
+  "version": "0.1.0",
+  "description": "基于 Element Plus 的 Schema 驱动容器组件库",
+  "keywords": [
+    "vue",
+    "vue3",
+    "component-library",
+    "element-plus",
+    "schema-form",
+    "container"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "style": "./dist/index.css",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./dist/*": "./dist/*",
+    "./*.css": "./dist/*.css",
+    "./package.json": "./package.json"
+  },
+  "sideEffects": [
+    "**/*.css",
+    "**/*.scss"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vite build",
+    "prepublishOnly": "pnpm build"
+  },
+  "peerDependencies": {
+    "element-plus": "^2.7.0",
+    "vue": "^3.4.0"
+  },
+  "devDependencies": {
+    "@ep-container-kit/components": "workspace:*",
+    "@ep-container-kit/constants": "workspace:*",
+    "@ep-container-kit/styles": "workspace:*",
+    "@ep-container-kit/types": "workspace:*",
+    "@ep-container-kit/utils": "workspace:*",
+    "@microsoft/api-extractor": "^7.59.4",
+    "@vitejs/plugin-vue": "^6.0.8",
+    "@vitejs/plugin-vue-jsx": "^5.1.6",
+    "element-plus": "^2.14.7",
+    "sass": "^1.105.2",
+    "vite": "^8.2.2",
+    "vite-plugin-dts": "^5.1.2",
+    "vue": "^3.5.42"
+  }
+}

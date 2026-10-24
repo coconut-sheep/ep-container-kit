@@ -1,30 +1,30 @@
 <script setup lang="ts" generic="T extends AnyRecord = AnyRecord">
+  import { computed, inject, provide, useTemplateRef } from 'vue';
+  import { ElForm, type FormInstance, type FormItemProp } from 'element-plus';
+  import {
+    FORM_CONTAINER_PROVIDE_KEY_LIST,
+    FORM_PROVIDER,
+  } from '@ep-container-kit/constants';
+  import type {
+    AnyRecord,
+    ConfigProviderProvide,
+    FormContainerProvideConfig,
+  } from '@ep-container-kit/types';
+  import {
+    filterNullishProps,
+    getRefExpose,
+    handleInjectValue,
+    handleProvideValue,
+    isArray,
+    omitEntryProps,
+  } from '@ep-container-kit/utils';
   import {
     COMPONENT_NAME,
     getComponentDefaultProps,
     type FormContainerEmits,
     type FormContainerProps,
-  } from '@ep-container-kit/components/form-container/src/form-container.ts';
-  import { computed, inject, provide, useTemplateRef } from 'vue';
-  import {
-    filterNullishProps,
-    getRefExpose,
-    isArray,
-    omitEntryProps,
-  } from '@ep-container-kit/utils';
-  import type { AnyRecord, EmitsToTuples } from '@ep-container-kit/types';
-  import { ElForm, type FormInstance, type FormItemProp } from 'element-plus';
-  import FormItemSchema from '@ep-container-kit/components/form-container/src/form-item-schema.vue';
-  import { FORM_PROVIDER } from '@ep-container-kit/constants';
-  import {
-    FORM_CONTAINER_PROVIDE_KEY_LIST,
-    type ConfigProviderProvide,
-    type FormContainerProvideConfig,
-  } from '@ep-container-kit/components/config-provider/src/config-provider.ts';
-  import {
-    handleInjectValue,
-    handleProvideValue,
-  } from '@ep-container-kit/components/config-provider/src/utils.ts';
+  } from './form-container';
+  import FormItemSchema from './form-item-schema.vue';
 
   defineOptions({
     name: COMPONENT_NAME,
@@ -39,7 +39,7 @@
 
   const props = defineProps<FormContainerProps<T>>();
 
-  const emits = defineEmits<EmitsToTuples<FormContainerEmits>>();
+  const emits = defineEmits<FormContainerEmits>();
 
   const defaultProps = getComponentDefaultProps();
 
