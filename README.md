@@ -27,8 +27,8 @@
 - **属性透传明确**：`CkFormItem` / `CkFormItemSchema` 关闭属性自动继承并手动透传到 `el-form-item`；`CkFormContainer` 的根节点本身就是 `<el-form>`，属性天然落到它上面
 - **类型完整**：`FormContainerItem<T>` 是 20 个成员的判别联合，`prop` 受业务数据类型约束
 - **页面骨架**：`CkPageContainer` + `CkPageContent` 提供「滚动容器 + 标题栏 + 内容区」的标准页面布局，`show-back` 内置返回箭头
-- **样式无侵入**：页面容器只用纯色底 + 细边框，不依赖 `backdrop-filter` 玻璃拟态与宿主自定义变量，颜色全部可被 Element Plus 主题变量覆盖
-- **标准库产物**：ESM + CJS + 单文件 d.ts + 独立 CSS，`vue` / `element-plus` 走 peer
+- **样式无侵入**：页面容器只用纯色底 + 细边框，不依赖 `backdrop-filter` 玻璃拟态与宿主自定义变量，颜色全部可被 Element Plus 主题变量覆盖；产物不含任何全局选择器（无 `*` / `html` / `body` 规则），不改宿主的 `box-sizing`、字体与滚动行为
+- **标准库产物**：ESM + CJS + 单文件 d.ts + 独立 CSS，`vue` / `element-plus` / `@element-plus/icons-vue` 走 peer
 
 ---
 
@@ -49,16 +49,21 @@
 
 ### 环境要求
 
-| 依赖         | 版本                           |
-| ------------ | ------------------------------ |
-| Vue          | `>= 3.4`                       |
-| Element Plus | `>= 2.7`                       |
-| Node.js      | `>= 22.18`（仅开发本仓库需要） |
+| 依赖                      | 版本                           |
+| ------------------------- | ------------------------------ |
+| Vue                       | `>= 3.4`                       |
+| Element Plus              | `>= 2.7`                       |
+| `@element-plus/icons-vue` | `>= 2.3`                       |
+| Node.js                   | `>= 22.18`（仅开发本仓库需要） |
+
+`@element-plus/icons-vue` 是 Element Plus 自身的依赖，但 pnpm 不会把它提升到宿主
+`node_modules` 顶层，因此需要显式安装——否则加载 `ep-container-kit` 时会抛
+`ERR_MODULE_NOT_FOUND`。
 
 ### 安装
 
 ```bash
-pnpm add ep-container-kit
+pnpm add ep-container-kit @element-plus/icons-vue
 # npm install ep-container-kit
 # yarn add ep-container-kit
 ```
@@ -112,6 +117,37 @@ app.use(CkFormContainer); // 等价于 app.component('CkFormContainer', CkFormCo
 目前是表单 + 页面两个模块，样式仍为单文件。后续 Table / Tree / Detail 落地后会按模块拆分（`table.css` / `tree.css` / `detail.css`）。
 
 > `col` 属性依赖 `index.css` 中的 `column-N` 工具类，请务必引入样式，否则占列布局不生效。
+
+#### 不做全局重置
+
+`dist/index.css` **不含任何全局选择器**（没有 `*`、`html`、`body` 规则），它只声明 `.page-content`、`.form-container` 这类组件类名下的样式。这与 Element Plus 一致——后者的产物里有 118 处 `box-sizing: border-box`，全部写在组件类上，`*` 选择器 0 处。
+
+这样做的原因：`* { box-sizing: border-box }` 会静默改变宿主既有布局。宿主里写了 `width: 100px; padding: 10px` 期待占 120px 的元素，引入组件库后会变成 100px；而且 `*` 的特异性为 0，一旦宿主也有同名规则，胜负完全取决于样式加载顺序，会变成极难定位的问题。`*` 还会命中第三方组件（地图、富文本编辑器、其他 UI 库）。
+
+组件自己需要的尺寸前提，写在各自 scoped 样式里，例如 `page-content.vue`：
+
+```scss
+.page-content {
+  // height: 100% 与 padding: 18px 并存，必须是 border-box 才不会溢出父级
+  box-sizing: border-box;
+  height: 100%;
+  padding: 18px;
+}
+```
+
+**因此宿主应当自行保证 `border-box`**。绝大多数项目本来就有这条规则，通常无需额外操作：
+
+```css
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+```
+
+缺少它时，组件自身的根元素仍正确（如上），但布局工具类会有偏差：`width-50` 这类百分比宽度叠加 `padding` 后，在 `content-box` 下会溢出容器。
+
+> 组件库自身严格遵守这条边界：`box-sizing` 只出现在组件 scoped 样式里；宿主专属的全局样式（`html` / `body` 尺寸与滚动行为、字体栈、`user-select`、`#app` 背景等）一概不提供，统一交由宿主决定。
 
 ---
 
@@ -242,7 +278,11 @@ const schema: FormContainerItem<UserForm>[] = [
     <!-- 列表页：标题在左，工具栏通过 #header 插槽放在右侧 -->
     <CkPageContent v-if="!current" title="资产列表">
       <template #header>
-        <el-input v-model="keyword" placeholder="按名称搜索" style="width: 220px" />
+        <el-input
+          v-model="keyword"
+          placeholder="按名称搜索"
+          style="width: 220px"
+        />
       </template>
       <el-table :data="list" @row-click="handleView" />
     </CkPageContent>
@@ -263,23 +303,34 @@ const schema: FormContainerItem<UserForm>[] = [
 
 ### CkPageContent 属性
 
-| 属性         | 类型               | 默认值 | 说明                                                       |
-| ------------ | ------------------ | ------ | ---------------------------------------------------------- |
+| 属性         | 类型               | 默认值  | 说明                                                       |
+| ------------ | ------------------ | ------- | ---------------------------------------------------------- |
 | `showBack`   | `boolean`          | `false` | 是否显示返回按钮                                           |
-| `title`      | `string`           | `''`   | 标题文案；与 `header` 插槽并存时标题在左、插槽内容在右     |
-| `bodyClass`  | `string`           | `''`   | 内容区的额外 class，用于叠加工具类（如 `flex-column`）     |
-| `fullHeight` | `boolean`          | `true` | 内容区是否撑满父元素高度；为 `true` 时忽略 `height`        |
-| `width`      | `string \| number` | `''`   | 内容区宽度，数字按 `px` 处理，也可传 `'100%'`              |
-| `height`     | `string \| number` | `''`   | 内容区高度，数字按 `px` 处理；仅在 `fullHeight=false` 生效 |
+| `title`      | `string`           | `''`    | 标题文案；与 `header` 插槽并存时标题在左、插槽内容在右     |
+| `bodyClass`  | `string`           | `''`    | 内容区的额外 class，用于叠加工具类（如 `flex-column`）     |
+| `fullHeight` | `boolean`          | `true`  | 内容区是否撑满父元素高度；为 `true` 时忽略 `height`        |
+| `width`      | `string \| number` | `''`    | 内容区宽度，数字按 `px` 处理，也可传 `'100%'`              |
+| `height`     | `string \| number` | `''`    | 内容区高度，数字按 `px` 处理；仅在 `fullHeight=false` 生效 |
 
 事件：`backClick` —— 点击返回按钮（或聚焦后按回车）时触发。
 
 ### 插槽
 
-| 插槽      | 说明                                                             |
-| --------- | ---------------------------------------------------------------- |
-| `default` | 内容区；不传则不渲染内容区 DOM                                   |
-| `header`  | 标题栏右侧区域，可单独驱动头部渲染（不传 `title`/`showBack` 时） |
+| 插槽        | 说明                                                             |
+| ----------- | ---------------------------------------------------------------- |
+| `default`   | 内容区；不传则不渲染内容区 DOM                                   |
+| `header`    | 标题栏右侧区域，可单独驱动头部渲染（不传 `title`/`showBack` 时） |
+| `back-icon` | 返回按钮图标，默认渲染 Element Plus 的 `ArrowLeft`               |
+
+`back-icon` 存在时**完全接管**图标区域，可用于换成其他图标集或自定义 SVG：
+
+```vue
+<CkPageContent title="详情" show-back>
+  <template #back-icon>
+    <ElIcon><Back /></ElIcon>
+  </template>
+</CkPageContent>
+```
 
 ### 布局约定
 
@@ -299,13 +350,13 @@ const schema: FormContainerItem<UserForm>[] = [
 
 这两个组件**不包含**半透明蒙层、`backdrop-filter` 背景模糊、大范围柔光阴影等玻璃拟态样式，也**不读取宿主自定义变量**（如 `--glass-filter`）。底色与描边全部走 Element Plus 主题变量：
 
-| 用途     | 变量                                                       |
-| -------- | ---------------------------------------------------------- |
-| 页面底色 | `--el-bg-color-page`                                       |
-| 标题栏底 | `--el-bg-color`                                            |
-| 描边     | `--el-border-color-lighter`                                |
-| 文字     | `--el-text-color-primary`                                  |
-| 返回高亮 | `--el-color-primary`                                       |
+| 用途     | 变量                        |
+| -------- | --------------------------- |
+| 页面底色 | `--el-bg-color-page`        |
+| 标题栏底 | `--el-bg-color`             |
+| 描边     | `--el-border-color-lighter` |
+| 文字     | `--el-text-color-primary`   |
+| 返回高亮 | `--el-color-primary`        |
 
 需要玻璃效果时，由宿主在外部覆盖（例如 `:deep(.page-content-header)` 加 `backdrop-filter`），组件库不预设视觉风格。
 
@@ -442,7 +493,7 @@ ep-container-kit/
 │   ├── constants/             # @ep-container-kit/constants（常量、InjectionKey）
 │   ├── types/                 # @ep-container-kit/types（公共类型）
 │   ├── utils/                 # @ep-container-kit/utils（运行时工具）
-│   ├── styles/                # @ep-container-kit/styles（全局工具类、动画）
+│   ├── styles/                # @ep-container-kit/styles（布局工具类、动画）
 │   └── ep-container-kit/      # ep-container-kit（唯一发布包，库模式构建）
 │       ├── index.ts
 │       ├── vite.config.ts
@@ -512,7 +563,7 @@ npm publish        # publishConfig.access = public
 
 `prepublishOnly` 已挂 `pnpm build`，即使跳过手动 build，发布前也会自动构建一次。
 
-`files` 仅包含 `dist`、`README.md`、`LICENSE`。`vue` 与 `element-plus` 为 peerDependencies，不会被打入产物。
+`files` 仅包含 `dist`、`README.md`、`LICENSE`。`vue`、`element-plus`、`@element-plus/icons-vue` 为 peerDependencies，不会被打入产物。
 
 ---
 

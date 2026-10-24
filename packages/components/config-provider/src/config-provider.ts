@@ -19,8 +19,8 @@ export interface ConfigProviderProps extends Partial<ElConfigProviderProps> {
   form?: FormContainerProvideConfig;
 }
 
-// 这两个类型原先定义在本文件，现统一收敛到 @ep-container-kit/types。
-// 此处按原路径再导出，避免破坏既有的深层引用。
+// 类型本体统一维护在 @ep-container-kit/types，此处再导出，
+// 使消费方既可从组件入口取，也能从类型包取，两条路径指向同一份定义。
 export type {
   ConfigProviderProvide,
   FormContainerProvideConfig,

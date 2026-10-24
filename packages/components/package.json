@@ -17,6 +17,7 @@
     "@ep-container-kit/utils": "workspace:*"
   },
   "peerDependencies": {
+    "@element-plus/icons-vue": "^2.3.0",
     "element-plus": "^2.7.0",
     "vue": "^3.4.0"
   }
