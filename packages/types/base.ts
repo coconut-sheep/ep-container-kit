@@ -1,4 +1,4 @@
-import type { AnyFunction, AnyRecord } from '@ep-container-kit/types/tools.ts';
+import type { AnyFunction, AnyRecord } from './tools';
 import type { Component } from 'vue';
 
 /**

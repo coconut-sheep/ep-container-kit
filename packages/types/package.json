@@ -1,0 +1,17 @@
+{
+  "name": "@ep-container-kit/types",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ep-container-kit 的公共类型定义",
+  "main": "index.ts",
+  "module": "index.ts",
+  "types": "index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./*": "./*"
+  },
+  "peerDependencies": {
+    "vue": "^3.4.0"
+  }
+}

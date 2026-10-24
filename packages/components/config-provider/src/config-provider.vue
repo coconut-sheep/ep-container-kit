@@ -1,13 +1,12 @@
 <script setup lang="ts">
-  import {
-    COMPONENT_NAME,
-    FORM_CONTAINER_PROVIDE_KEY_LIST,
-    type ConfigProviderProps,
-  } from '@ep-container-kit/components/config-provider/src/config-provider.ts';
   import { computed, provide } from 'vue';
-  import { FORM_PROVIDER } from '@ep-container-kit/constants';
-  import { omitEntryProps } from '@ep-container-kit/utils';
-  import { handleProvideValue } from '@ep-container-kit/components/config-provider/src/utils.ts';
+  import { ElConfigProvider } from 'element-plus';
+  import {
+    FORM_CONTAINER_PROVIDE_KEY_LIST,
+    FORM_PROVIDER,
+  } from '@ep-container-kit/constants';
+  import { handleProvideValue, omitEntryProps } from '@ep-container-kit/utils';
+  import { COMPONENT_NAME, type ConfigProviderProps } from './config-provider';
 
   defineOptions({
     name: COMPONENT_NAME,
@@ -16,7 +15,7 @@
   const props = defineProps<ConfigProviderProps>();
 
   /**
-   * 提供FormContainer 组件的 provide 属性
+   * 提供 FormContainer 组件的 provide 属性
    */
   provide(
     FORM_PROVIDER,

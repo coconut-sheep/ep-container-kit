@@ -1,0 +1,23 @@
+{
+  "name": "@ep-container-kit/components",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ep-container-kit 的组件实现",
+  "main": "index.ts",
+  "module": "index.ts",
+  "types": "index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./*": "./*"
+  },
+  "dependencies": {
+    "@ep-container-kit/constants": "workspace:*",
+    "@ep-container-kit/types": "workspace:*",
+    "@ep-container-kit/utils": "workspace:*"
+  },
+  "peerDependencies": {
+    "element-plus": "^2.7.0",
+    "vue": "^3.4.0"
+  }
+}

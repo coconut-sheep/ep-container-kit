@@ -1,6 +1,6 @@
-import type { FormContainerItem } from '@ep-container-kit/components/form-container/src/form-item.ts';
+import type { FormContainerItem } from './form-item';
 import type { AnyRecord } from '@ep-container-kit/types';
-import { getComponentName } from '@ep-container-kit/constants/index.ts';
+import { getComponentName } from '@ep-container-kit/constants';
 
 /**
  * FormItemSchema的组件名

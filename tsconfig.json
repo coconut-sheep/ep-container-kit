@@ -1,14 +1,41 @@
 {
-  "files": [],
-  "references": [
-    {
-      "path": "./tsconfig.node.json"
-    },
-    {
-      "path": "./tsconfig.app.json"
-    },
-    {
-      "path": "./tsconfig.vitest.json"
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
+  "include": [
+    "env.d.ts",
+    "packages/**/*.ts",
+    "packages/**/*.vue",
+    "example/src/**/*.ts",
+    "example/src/**/*.vue"
+  ],
+  "exclude": [
+    "**/dist/**",
+    "**/node_modules/**",
+    "**/vite.config.ts",
+    "**/vitest.config.ts"
+  ],
+  "compilerOptions": {
+    // 数组/对象下标访问返回 T | undefined，避免越界访问被静默放行
+    "noUncheckedIndexedAccess": true,
+
+    // 路径映射与 pnpm workspace 软链双保险：
+    // 正常情况下 `@ep-container-kit/*` 由各子包 package.json 的 main 字段解析，
+    // 这里的 paths 仅用于 pnpm install 尚未执行时的编辑器兜底。
+    // 注意：这里只做「包名 → 目录」的一一映射，不再承担源码复制场景的别名职责。
+    "paths": {
+      "ep-container-kit": ["./packages/ep-container-kit/index.ts"],
+      // example 自身的应用内别名，与 example/vite.config.ts 的 resolve.alias 对应
+      "@/*": ["./example/src/*"],
+      "@ep-container-kit": ["./packages/ep-container-kit"],
+      "@ep-container-kit/components": ["./packages/components"],
+      "@ep-container-kit/components/*": ["./packages/components/*"],
+      "@ep-container-kit/constants": ["./packages/constants"],
+      "@ep-container-kit/constants/*": ["./packages/constants/*"],
+      "@ep-container-kit/types": ["./packages/types"],
+      "@ep-container-kit/types/*": ["./packages/types/*"],
+      "@ep-container-kit/utils": ["./packages/utils"],
+      "@ep-container-kit/utils/*": ["./packages/utils/*"],
+      "@ep-container-kit/styles": ["./packages/styles"],
+      "@ep-container-kit/styles/*": ["./packages/styles/*"]
     }
-  ]
+  }
 }

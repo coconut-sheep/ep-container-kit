@@ -1,31 +1,33 @@
-<script setup lang="ts" generic="T extends AnyRecord = AnyRecord">
-  import {
-    COMPONENT_NAME,
-    type FormContainerItem,
-    type FormItemProps,
-    getComponentDefaultProps,
-  } from '@ep-container-kit/components/form-container/src/form-item.ts';
+<script setup lang="ts">
   import { computed, h, inject, useAttrs, useSlots } from 'vue';
-  import type { AnyRecord, AnyValue, BaseSlots } from '@ep-container-kit/types';
   import { ElFormItem } from 'element-plus';
+  import {
+    FORM_CONTAINER_PROVIDE_KEY_LIST,
+    FORM_PROVIDER,
+  } from '@ep-container-kit/constants';
+  import type {
+    AnyRecord,
+    AnyValue,
+    BaseSlots,
+    ConfigProviderProvide,
+    FormContainerProvideConfig,
+  } from '@ep-container-kit/types';
   import {
     defineProp,
     filterNullishProps,
+    handleInjectValue,
     isUndefined,
     omitEntryProps,
     toSizeValue,
   } from '@ep-container-kit/utils';
-  import { FORM_PROVIDER } from '@ep-container-kit/constants';
   import {
-    FORM_CONTAINER_PROVIDE_KEY_LIST,
-    type ConfigProviderProvide,
-    type FormContainerProvideConfig,
-  } from '@ep-container-kit/components/config-provider/src/config-provider.ts';
-  import { handleInjectValue } from '@ep-container-kit/components/config-provider/src/utils.ts';
-  import {
-    createFormItemComponent,
-    handleFormItemProp,
-  } from '@ep-container-kit/components/form-container/src/utils.ts';
+    COMPONENT_NAME,
+    type FormContainerItem,
+    type FormItemBase,
+    type FormItemProps,
+    getComponentDefaultProps,
+  } from './form-item';
+  import { createFormItemComponent, handleFormItemProp } from './utils';
 
   defineOptions({
     name: COMPONENT_NAME,
@@ -37,9 +39,53 @@
     required: false,
   });
 
-  const props = defineProps<FormItemProps>();
+  /**
+   * 运行时 props 声明
+   * @description
+   * `FormItemProps` 是由 20 个成员组成的判别联合，基类中还混入了
+   * `InstanceType<typeof ElFormItem>['$slots']` 这类深层类型。
+   * @vue/compiler-sfc 在构建期需要把 `defineProps<T>()` 的类型翻译成运行时 props 声明，
+   * 解析上述类型时会无限递归（RangeError: Maximum call stack size exceeded）。
+   *
+   * 因此这里显式声明运行时 props（保证默认值、Boolean 转换、devtools 展示都正确），
+   * 再断言回 `FormItemBase` 保留编译期类型约束。对外暴露的 Schema 类型仍是完整的 `FormItemProps`。
+   */
+  const _props = defineProps({
+    /** 数据源字段名，同时作为 el-form-item 的 prop */
+    prop: { type: [String, Number], default: undefined },
+    /** 标签文案 */
+    label: { type: String, default: undefined },
+    /** 校验规则 */
+    rules: { type: [Array, Object], default: () => [] },
+    /** 占列数（column-N） */
+    col: { type: Number, default: undefined },
+    /** 是否可见（v-show 语义） */
+    visible: { type: Boolean, default: true },
+    /** 是否隐藏（v-if 语义） */
+    hidden: { type: Boolean, default: false },
+    /** 内置控件类型 */
+    type: { type: String, default: undefined },
+    /** el-form-item 的 props */
+    itemProps: { type: Object, default: () => ({}) },
+    /** el-form-item 的插槽 */
+    itemSlots: { type: Object, default: () => ({}) },
+    /** 内置控件的 props */
+    props: { type: Object, default: () => ({}) },
+    /** 内置控件的插槽 */
+    slots: { type: Object, default: () => ({}) },
+    /** 内置控件的事件 */
+    events: { type: Object, default: () => ({}) },
+    /** type=custom 时使用的组件 */
+    component: { type: [Object, String, Function], default: undefined },
+    /** 自定义整体渲染函数 */
+    itemRender: { type: Function, default: undefined },
+    /** type=render 时的渲染函数 */
+    render: { type: Function, default: undefined },
+  });
 
-  const slots = useSlots();
+  const props = _props as unknown as Readonly<FormItemBase>;
+
+  const templateSlots = useSlots();
   const attrs = useAttrs();
 
   const _inject = inject<
@@ -68,8 +114,8 @@
       ...defaultProps,
       ...definedProps,
       ...defineProp('itemProps', {
-        ...(defaultProps.itemProps || {}),
-        ...(definedProps.itemProps || {}),
+        ...defaultProps.itemProps,
+        ...definedProps.itemProps,
         ...injectProps,
       }),
     } as FormItemProps;
@@ -121,14 +167,14 @@
     }
 
     // 使用模板语法传入的默认插槽
-    if (slots.default) {
-      _defaultSlots['default'] = slots.default;
+    if (templateSlots.default) {
+      _defaultSlots['default'] = templateSlots.default;
     }
 
     // 使用模板语法传入的默认插槽，在props值有效时生效
     if (formItemProps.value.prop) {
       const _slotName = `slot_${formItemProps.value.prop}`;
-      const _slotContent = slots[_slotName];
+      const _slotContent = templateSlots[_slotName];
       if (_slotContent) {
         _defaultSlots['default'] = _slotContent;
       }
@@ -172,7 +218,7 @@
   const formItemStyle = computed<AnyRecord>(() => {
     return {
       ...vShowStyle.value,
-      ...(formItemProps.value.itemProps?.style || {}),
+      ...formItemProps.value.itemProps?.style,
       ...widthStyle.value,
     };
   });
@@ -194,7 +240,7 @@
       'default',
     ]);
     // 使用模板语法传入的其他插槽
-    const templateOtherSlots = omitEntryProps(slots, ['default']);
+    const templateOtherSlots = omitEntryProps(templateSlots, ['default']);
     return {
       ...defaultSlots.value,
       ...otherSlots,
@@ -227,7 +273,7 @@
       {
         ...attrs,
         ..._formItemProps,
-        ...(formItemProps.value.itemProps || {}),
+        ...formItemProps.value.itemProps,
         style: formItemStyle.value,
         class: formItemClass.value,
       },

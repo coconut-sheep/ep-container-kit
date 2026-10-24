@@ -6,6 +6,7 @@ import type {
   BaseEvents,
   BaseProps,
   BaseSlots,
+  FormContainerProvideConfig,
   PickToRequired,
 } from '@ep-container-kit/types';
 import {
@@ -63,7 +64,6 @@ import type {
 } from 'element-plus';
 import type { EmitFn, Ref, VNode } from 'vue';
 import { getComponentName } from '@ep-container-kit/constants';
-import type { FormContainerProvideProps } from '@ep-container-kit/components/form-container/src/form-container.ts';
 
 /**
  * 表单项的组件名
@@ -151,7 +151,7 @@ export interface FormItemBase<T extends AnyRecord = AnyRecord> {
   /**
    * ElFormItem的属性，包括props与attrs（自定义属性）
    */
-  itemProps?: ElFormItemProps & FormContainerProvideProps & AnyRecord;
+  itemProps?: ElFormItemProps & FormContainerProvideConfig & AnyRecord;
   /**
    * 表单项的插槽
    * @description 提供ElFormItem的各插槽。当未提供 `itemSlots.default`、模板 `slots.default` 或模板 `slot_${prop}` 插槽时，默认插槽由 `type` 对应的内置组件自动生成
@@ -212,27 +212,33 @@ export interface FormItemAny<
 
 /**
  * 使用custom的FormItem配置
+ * @description 这里必须用 type 别名而非 interface extends：
+ * `PickToRequired` 是映射类型，`interface extends` 无法被 @vue/compiler-sfc 解析，
+ * 会导致 `defineProps<FormItemProps>()` 在构建期报 "Failed to resolve extends base type"
  */
-export interface FormItemCustom<
-  T extends AnyRecord = AnyRecord,
-> extends PickToRequired<FormItemBase<T>, 'component'> {
+export type FormItemCustom<T extends AnyRecord = AnyRecord> = PickToRequired<
+  FormItemBase<T>,
+  'component'
+> & {
   /**
    * 表单项的类型，必须为custom
    */
   type: 'custom';
-}
+};
 
 /**
  * 使用render的FormItem配置
+ * @description 同 FormItemCustom，使用 type 别名以兼容 @vue/compiler-sfc 的类型解析
  */
-export interface FormItemRender<
-  T extends AnyRecord = AnyRecord,
-> extends PickToRequired<FormItemBase<T>, 'render'> {
+export type FormItemRender<T extends AnyRecord = AnyRecord> = PickToRequired<
+  FormItemBase<T>,
+  'render'
+> & {
   /**
    * 表单项的类型，必须为render
    */
   type: 'render';
-}
+};
 
 /**
  * 使用ElInput组件的FormItem配置

@@ -167,7 +167,7 @@ export const toSizeValue = (value: AnyValue, unit: string = 'px'): string => {
  * @param cb 回调函数
  * @param cb.successCallback 成功时的回调函数
  * @param cb.successFormater 成功时的格式化函数，可用于格式化返回值
- * @param cb.errorCallback 报错时的回调函数
+ * @param cb.failureCallback 报错时的回调函数
  */
 export const jsonParse = <T extends AnyValue = AnyValue>(
   text: string,
@@ -182,13 +182,13 @@ export const jsonParse = <T extends AnyValue = AnyValue>(
   let result: T;
   try {
     result = JSON.parse(text) as T;
-    successCallback && successCallback(result);
+    successCallback?.(result);
     if (successFormater) {
       result = successFormater(result);
     }
   } catch (error) {
     result = defaultValue;
-    failureCallback && failureCallback(error, result);
+    failureCallback?.(error, result);
   }
 
   return result;
