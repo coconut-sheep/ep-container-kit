@@ -82,9 +82,14 @@ import 'ep-container-kit/dist/index.css';
 </script>
 
 <template>
-  <CkFormContainer v-model:source="formData" :schema="schema" />
+  <CkFormContainer v-model="formData" :schema="schema" />
 </template>
 ```
+
+`v-model` 是唯一的数据入口：容器内部把它作为 `ElForm` 的 `model` 交给 Element Plus 做校验，
+因此不需要再传 `:model`（已从 props 类型中移除，传了会被忽略并给出提示）。字段写回采用
+**就地修改**，父级持有的同一对象会实时更新，但不会派发 `update:modelValue`——需要监听变化
+请 `watch` 数据对象。
 
 ### 页面
 

@@ -1,5 +1,12 @@
 <script setup lang="ts" generic="T extends AnyRecord = AnyRecord">
-  import { computed, inject, provide, useTemplateRef } from 'vue';
+  import {
+    computed,
+    inject,
+    provide,
+    useAttrs,
+    useTemplateRef,
+    warn,
+  } from 'vue';
   import { ElForm, type FormInstance, type FormItemProp } from 'element-plus';
   import {
     FORM_CONTAINER_PROVIDE_KEY_LIST,
@@ -16,7 +23,7 @@
     handleInjectValue,
     handleProvideValue,
     isArray,
-    omitEntryProps,
+    pickEntryProps,
   } from '@ep-container-kit/utils';
   import {
     COMPONENT_NAME,
@@ -28,9 +35,11 @@
 
   defineOptions({
     name: COMPONENT_NAME,
+    // 关闭自动继承：根节点上 `:model` 的写入顺序需要可控，见模板中的 v-bind 顺序
+    inheritAttrs: false,
   });
 
-  const sourceData = defineModel<T>('source', {
+  const sourceData = defineModel<T>({
     required: false,
     default: () => {
       return {} as T;
@@ -40,6 +49,19 @@
   const props = defineProps<FormContainerProps<T>>();
 
   const emits = defineEmits<FormContainerEmits>();
+
+  const attrs = useAttrs();
+
+  /**
+   * 数据源只认 `v-model`
+   * @description `:model` 已从 props 类型中剔除，这里兜住不经过类型检查的写法（JS 调用、动态绑定）。
+   * 静默忽略会让调用方误判为「数据已传入但校验不通过」，因此给出显式提示。
+   */
+  if (attrs.model) {
+    warn(
+      `[${COMPONENT_NAME}] 数据源请通过 v-model 传入，:model 会被内部绑定覆盖并忽略。`,
+    );
+  }
 
   const defaultProps = getComponentDefaultProps();
 
@@ -75,15 +97,17 @@
 
   /**
    * 传递给 el-form 的 props
-   * @description 剔除 el-form 不认识的内部 key（schema / 提供配置 / vertical），避免其作为 fallthrough attribute 落到根元素
+   * @description 用「el-form 实际声明的 props」做白名单，而不是剔除已知的内部 key。
+   * 容器的 props 里混着三类 el-form 不认识的东西：`schema`、`vertical` / `itemMinWidth` 等
+   * 容器自有配置，以及 `v-model` 生成的 `modelValue`。只要漏掉一个，它就会作为
+   * fallthrough attribute 落到 `<form>` 上，渲染成 `modelvalue="[object Object]"` 这类脏属性。
+   * 白名单从根上避免了「新增内部配置忘记同步剔除列表」的问题。
    */
   const formContainerProps = computed(() => {
-    return omitEntryProps(mergedProps.value, [
-      'schema',
-      'itemMinWidth',
-      'itemMaxWidth',
-      'vertical',
-    ]);
+    return pickEntryProps(
+      mergedProps.value as AnyRecord,
+      Object.keys(ElForm.props ?? {}),
+    );
   });
 
   const formContainerRef = useTemplateRef<FormInstance>('formContainerRef');
@@ -124,7 +148,7 @@
   <el-form
     ref="formContainerRef"
     class="form-container"
-    v-bind="formContainerProps"
+    v-bind="{ ...$attrs, ...formContainerProps }"
     :class="formContainerClass"
     :model="sourceData"
     @submit.prevent="handleFormSubmit"
@@ -133,7 +157,7 @@
     <slot>
       <FormItemSchema
         v-if="hasSchema"
-        v-model:source="sourceData"
+        v-model="sourceData"
         :schema="mergedProps.schema!"
       >
         <template

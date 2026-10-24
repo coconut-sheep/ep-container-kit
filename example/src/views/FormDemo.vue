@@ -90,7 +90,7 @@
         <CkConfigProvider :form="{ labelWidth: '96px', labelPosition: 'right' }">
           <CkFormContainer
             ref="formRef"
-            v-model:source="source"
+            v-model="source"
             :schema="schema"
             vertical
           />

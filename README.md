@@ -24,7 +24,7 @@
 
 - **Schema 驱动**：`type` + `prop` + `props` 描述表单项，支持 17 种内置控件与 `custom` / `render` 两种逃生通道
 - **三级配置优先级**：`组件显式传入 > CkConfigProvider 注入 > 组件默认值`
-- **属性透传明确**：`CkFormItem` / `CkFormItemSchema` 关闭属性自动继承并手动透传到 `el-form-item`；`CkFormContainer` 的根节点本身就是 `<el-form>`，属性天然落到它上面
+- **属性透传明确**：`CkFormItem` / `CkFormItemSchema` 关闭属性自动继承并手动透传到 `el-form-item`；`CkFormContainer` 同样关闭自动继承，按 `$attrs` → `el-form` 声明过的 props → `v-model` 的顺序显式绑定，保证误传的 `:model` 盖不掉数据源
 - **类型完整**：`FormContainerItem<T>` 是 20 个成员的判别联合，`prop` 受业务数据类型约束
 - **页面骨架**：`CkPageContainer` + `CkPageContent` 提供「滚动容器 + 标题栏 + 内容区」的标准页面布局，`show-back` 内置返回箭头
 - **样式无侵入**：页面容器只用纯色底 + 细边框，不依赖 `backdrop-filter` 玻璃拟态与宿主自定义变量，颜色全部可被 Element Plus 主题变量覆盖；产物不含任何全局选择器（无 `*` / `html` / `body` 规则），不改宿主的 `box-sizing`、字体与滚动行为
@@ -249,16 +249,18 @@ const schema: FormContainerItem<UserForm>[] = [
 </script>
 
 <template>
-  <CkFormContainer
-    ref="formRef"
-    v-model:source="formData"
-    :schema="schema"
-    vertical
-  >
+  <CkFormContainer ref="formRef" v-model="formData" :schema="schema" vertical>
     <ElButton type="primary" @click="submit">提交</ElButton>
   </CkFormContainer>
 </template>
 ```
+
+### 数据源与校验
+
+`v-model` 是唯一的数据入口。容器把它原样作为内部 `ElForm` 的 `model`，Element Plus 正是靠这个值定位字段、取到 `el-form-item` 的 `prop` 并执行 `rules`——所以**不需要、也不应该再传 `:model`**：
+
+- `:model` 已从 props 类型中移除，传了会被忽略（运行时给出一条 `warn`），因为数据源已经由 `v-model` 提供，容器会在内部把 `v-model` 的值绑定到 `el-form` 上。
+- 写回是**就地修改**：编辑字段时容器直接改写 `v-model` 传入对象的对应属性，父级持有的同一个对象会实时更新；也因此不会派发 `update:modelValue`。需要监听变化请 `watch` 数据对象，或用 `computed` 派生，不要依赖 `@update:model-value`。
 
 ### 单独使用表单项
 
@@ -271,7 +273,7 @@ const schema: FormContainerItem<UserForm>[] = [
 具名插槽（`prefix`、`suffix` 等）会被批量透传，直接写在 `CkFormItem` 上即可生效。模板中名为 `slot_${prop}` 的插槽优先级最高，可用来覆盖某个字段的默认控件（插槽内自行读写数据源）：
 
 ```vue
-<CkFormContainer v-model:source="formData" :schema="schema">
+<CkFormContainer v-model="formData" :schema="schema">
   <template #slot_username>
     <el-input v-model="formData.username" placeholder="自定义控件" />
   </template>
@@ -610,7 +612,7 @@ npm publish        # publishConfig.access = public
 
 **Q：为什么 `class` 和事件落在了内层 `el-form-item` 上？**
 
-`CkFormItem` / `CkFormItemSchema` 关闭了属性自动继承（根节点是动态 component，没有天然的透传目标），改为把 `class`、`style`、事件、原生属性手动合并到内部 `el-form-item` 的 props 上，行为与直接写 Element Plus 一致。`CkFormContainer` 则无需处理——它的根节点就是 `<el-form>`。
+`CkFormItem` / `CkFormItemSchema` 关闭了属性自动继承（根节点是动态 component，没有天然的透传目标），改为把 `class`、`style`、事件、原生属性手动合并到内部 `el-form-item` 的 props 上，行为与直接写 Element Plus 一致。`CkFormContainer` 也关闭了自动继承：它的 `$attrs` 里可能混着 `:model` 这类与内部绑定重名的属性，自动继承的合并顺序由 Vue 运行时决定、`$attrs` 会覆盖显式绑定，所以改为手动按 `$attrs` → `el-form` 白名单 props → `:model="v-model 的值"` 的顺序绑定，数据源始终以 `v-model` 为准。
 
 **Q：`CkFormContainer` 的默认插槽会覆盖 schema 渲染吗？**
 

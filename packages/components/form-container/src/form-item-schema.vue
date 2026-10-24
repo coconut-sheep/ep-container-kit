@@ -31,7 +31,7 @@
     inheritAttrs: false,
   });
 
-  const sourceData = defineModel<T>('source', {
+  const sourceData = defineModel<T>({
     required: false,
     default: () => {
       return {} as T;
