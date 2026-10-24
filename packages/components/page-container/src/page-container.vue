@@ -13,6 +13,10 @@
 </template>
 
 <style scoped lang="scss">
+  @use '@ep-container-kit/styles/mixins' as *;
+
+  @include ck-border-box;
+
   .page-container {
     position: relative;
     display: flex;

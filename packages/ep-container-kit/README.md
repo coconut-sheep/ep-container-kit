@@ -22,9 +22,12 @@ yarn add ep-container-kit @element-plus/icons-vue
 > `@element-plus/icons-vue` 虽然是 Element Plus 自身的依赖，但 pnpm 不会把它提升到宿主的
 > `node_modules` 顶层，不装会在加载本包时抛 `ERR_MODULE_NOT_FOUND`。
 
-`dist/index.css` 不含全局重置：没有 `*` / `html` / `body` 规则，只声明组件类名下的样式。
-请自行确保项目里有 `* { box-sizing: border-box }`（多数项目本来就有），否则布局工具类的
-百分比宽度叠加 `padding` 会溢出容器。
+`dist/index.css` 不含全局重置：没有 `*` / `html` / `body` 规则，只声明组件类名与 `[data-v-xxx]`
+属性选择器，作用范围限定在组件自身渲染出的元素上，不会改写宿主的内容。
+
+组件盒模型已由库内部保证，宿主无需为组件额外声明 `border-box`；但建议项目里保留
+`* { box-sizing: border-box }`（多数项目本来就有），否则布局工具类的百分比宽度叠加
+`padding` 会溢出容器。
 
 ## 快速开始
 

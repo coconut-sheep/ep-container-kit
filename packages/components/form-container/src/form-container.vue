@@ -149,6 +149,10 @@
 </template>
 
 <style scoped lang="scss">
+  @use '@ep-container-kit/styles/mixins' as *;
+
+  @include ck-border-box;
+
   .form-container {
     display: flex;
     row-gap: 16px;

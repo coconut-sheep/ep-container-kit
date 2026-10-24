@@ -89,12 +89,13 @@
 </template>
 
 <style scoped lang="scss">
+  @use '@ep-container-kit/styles/mixins' as *;
+
+  @include ck-border-box;
+
   .page-content {
     display: flex;
     flex-direction: column;
-    // `height: 100%` 与 `padding: 18px` 并存，必须是 border-box 才不会溢出父级。
-    // 组件库不做全局 reset，这个尺寸前提由组件自己在 scoped 样式里声明
-    box-sizing: border-box;
     width: 100%;
     padding: 18px;
     row-gap: 14px;
@@ -104,8 +105,6 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      // `min-height` 需包含 padding 与 border，否则 52px 会变成 70px
-      box-sizing: border-box;
       min-width: 0;
       min-height: 52px;
       padding: 8px 10px;

@@ -287,6 +287,10 @@
 </template>
 
 <style scoped lang="scss">
+  @use '@ep-container-kit/styles/mixins' as *;
+
+  @include ck-border-box;
+
   .form-item {
     margin-bottom: 0;
     width: 100%;

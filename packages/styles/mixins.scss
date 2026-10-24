@@ -1,0 +1,22 @@
+/// 组件盒模型基线
+/// @description
+/// 在组件的 `<style scoped>` 里 `@include ck-border-box;`，该组件模板内的所有元素
+/// 即统一为 `border-box`，不必逐个类名声明。新增组件同样只需一行。
+///
+/// 作用范围为什么是可控的：
+/// - Vue 的 scoped 编译器会把裸 `*` 替换成 `[data-v-xxx]` 属性选择器（而不是留作
+///   通配符），因此只命中当前组件模板渲染出的元素
+/// - 宿主通过插槽传入的内容带的是宿主的 scopeId，子组件内部元素带的是子组件自己的
+///   scopeId，两者都不匹配本组件的属性选择器
+///
+/// 编译结果为 `[data-v-x], [data-v-x]::before, [data-v-x]::after`，特异性 (0,1,0)：
+/// 组件自身的类规则仍可覆盖它，宿主则完全不受影响。
+/// 此处刻意不用 `:where()` 包裹——CSS 压缩会把 `:where(x::before)` 优化成空的
+/// `:where()`，导致伪元素规则被整体丢弃。
+@mixin ck-border-box {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+}

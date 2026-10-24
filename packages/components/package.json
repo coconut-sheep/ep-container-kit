@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@ep-container-kit/constants": "workspace:*",
+    "@ep-container-kit/styles": "workspace:*",
     "@ep-container-kit/types": "workspace:*",
     "@ep-container-kit/utils": "workspace:*"
   },

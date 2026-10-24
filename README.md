@@ -120,22 +120,38 @@ app.use(CkFormContainer); // 等价于 app.component('CkFormContainer', CkFormCo
 
 #### 不做全局重置
 
-`dist/index.css` **不含任何全局选择器**（没有 `*`、`html`、`body` 规则），它只声明 `.page-content`、`.form-container` 这类组件类名下的样式。这与 Element Plus 一致——后者的产物里有 118 处 `box-sizing: border-box`，全部写在组件类上，`*` 选择器 0 处。
+`dist/index.css` **不含任何全局选择器**（没有 `*`、`html`、`body` 规则），它只声明组件类名与 `[data-v-xxx]` 属性选择器，作用范围限定在组件自身渲染出的元素上。这与 Element Plus 一致——后者同样不做全局重置，118 处 `box-sizing: border-box` 全部写在组件类上，`*` 选择器 0 处。
 
 这样做的原因：`* { box-sizing: border-box }` 会静默改变宿主既有布局。宿主里写了 `width: 100px; padding: 10px` 期待占 120px 的元素，引入组件库后会变成 100px；而且 `*` 的特异性为 0，一旦宿主也有同名规则，胜负完全取决于样式加载顺序，会变成极难定位的问题。`*` 还会命中第三方组件（地图、富文本编辑器、其他 UI 库）。
 
-组件自己需要的尺寸前提，写在各自 scoped 样式里，例如 `page-content.vue`：
+组件的盒模型由 `ck-border-box` mixin 统一提供，每个组件只需一行：
 
 ```scss
-.page-content {
-  // height: 100% 与 padding: 18px 并存，必须是 border-box 才不会溢出父级
+<style scoped lang="scss">
+  @use '@ep-container-kit/styles/mixins' as *;
+
+  @include ck-border-box;
+
+  .page-content {
+    height: 100%;
+    padding: 18px;
+  }
+</style>
+```
+
+它编译成三条属性选择器，而不是通配符：
+
+```css
+[data-v-a06c0e8a],
+[data-v-a06c0e8a]::before,
+[data-v-a06c0e8a]::after {
   box-sizing: border-box;
-  height: 100%;
-  padding: 18px;
 }
 ```
 
-**因此宿主应当自行保证 `border-box`**。绝大多数项目本来就有这条规则，通常无需额外操作：
+Vue 的 scoped 编译器会把裸 `*` 替换成 `[data-v-xxx]`，因此它只命中当前组件模板渲染出的元素。宿主通过插槽传入的内容带的是宿主的 scopeId，子组件内部元素带的是子组件自己的 scopeId，两者都不匹配，不会被改写。
+
+**宿主侧仍建议自行声明 `border-box`**，它只影响布局工具类：
 
 ```css
 *,
@@ -145,7 +161,7 @@ app.use(CkFormContainer); // 等价于 app.component('CkFormContainer', CkFormCo
 }
 ```
 
-缺少它时，组件自身的根元素仍正确（如上），但布局工具类会有偏差：`width-50` 这类百分比宽度叠加 `padding` 后，在 `content-box` 下会溢出容器。
+缺少它时组件自身不受影响（已由 mixin 保证），但 `width-50` 这类百分比工具类叠加 `padding` 后会在 `content-box` 下溢出容器。
 
 > 组件库自身严格遵守这条边界：`box-sizing` 只出现在组件 scoped 样式里；宿主专属的全局样式（`html` / `body` 尺寸与滚动行为、字体栈、`user-select`、`#app` 背景等）一概不提供，统一交由宿主决定。
 

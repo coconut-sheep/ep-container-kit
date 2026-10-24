@@ -123,6 +123,9 @@ importers:
       '@ep-container-kit/constants':
         specifier: workspace:*
         version: link:../constants
+      '@ep-container-kit/styles':
+        specifier: workspace:*
+        version: link:../styles
       '@ep-container-kit/types':
         specifier: workspace:*
         version: link:../types
