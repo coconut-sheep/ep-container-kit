@@ -1,12 +1,5 @@
 <script setup lang="ts" generic="T extends AnyRecord = AnyRecord">
-  import {
-    computed,
-    inject,
-    provide,
-    useAttrs,
-    useTemplateRef,
-    warn,
-  } from 'vue';
+  import { computed, provide, useAttrs, useTemplateRef, warn } from 'vue';
   import { ElForm, type FormInstance, type FormItemProp } from 'element-plus';
   import {
     FORM_CONTAINER_PROVIDE_KEY_LIST,
@@ -14,10 +7,10 @@
   } from '@ep-container-kit/constants';
   import type {
     AnyRecord,
-    ConfigProviderProvide,
     FormContainerProvideConfig,
   } from '@ep-container-kit/types';
   import {
+    buildProviderInject,
     filterNullishProps,
     getRefExpose,
     handleInjectValue,
@@ -26,8 +19,8 @@
     pickEntryProps,
   } from '@ep-container-kit/utils';
   import {
+    COMPONENT_DEFAULT_PROPS,
     COMPONENT_NAME,
-    getComponentDefaultProps,
     type FormContainerEmits,
     type FormContainerProps,
   } from './form-container';
@@ -47,9 +40,7 @@
   });
 
   const props = defineProps<FormContainerProps<T>>();
-
   const emits = defineEmits<FormContainerEmits>();
-
   const attrs = useAttrs();
 
   /**
@@ -63,12 +54,10 @@
     );
   }
 
-  const defaultProps = getComponentDefaultProps();
+  const _inject =
+    buildProviderInject<FormContainerProvideConfig>(FORM_PROVIDER);
 
-  const _inject = inject<
-    Partial<ConfigProviderProvide<FormContainerProvideConfig>>
-  >(FORM_PROVIDER, {});
-
+  const defaultProps = COMPONENT_DEFAULT_PROPS;
   const mergedProps = computed(() => {
     const definedProps = filterNullishProps(props);
 

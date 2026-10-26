@@ -10,7 +10,10 @@ import type {
 } from '@ep-container-kit/types';
 import type { FormItemSchemaProps } from './form-item-schema';
 import { getComponentName } from '@ep-container-kit/constants';
-import { getPropsDefaultValue } from '@ep-container-kit/utils';
+import {
+  buildPropsDefaultValues,
+  getPropsDefaultValue,
+} from '@ep-container-kit/utils';
 
 /**
  * 表单容器的组件名
@@ -39,12 +42,11 @@ export type FormContainerProps<T extends AnyRecord = AnyRecord> = Omit<
 /**
  * 表单容器的 props 默认值
  */
-export const getComponentDefaultProps = (): FormContainerProps => {
-  return {
+export const COMPONENT_DEFAULT_PROPS =
+  buildPropsDefaultValues<FormContainerProps>({
     ...getPropsDefaultValue(ElForm.props),
     vertical: false,
-  };
-};
+  });
 
 /**
  * 表单容器的事件

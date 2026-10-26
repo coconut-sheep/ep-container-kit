@@ -1,10 +1,11 @@
-import type { Ref } from 'vue';
+import { type Ref } from 'vue';
 import type {
   AnyRecord,
   AnyValue,
   PickFunction,
 } from '@ep-container-kit/types';
 import { isFunction } from './types';
+import { defineProp } from './object';
 
 /**
  * 获取某个 ref 对象所暴露的属性（代理转发，方法自动绑定 this）
@@ -59,4 +60,30 @@ export const getRefExposeManuel = <T extends AnyRecord>(
         (ref.value as AnyRecord | undefined)?.[name as string]?.(...args),
     ]),
   );
+};
+
+/**
+ * 构建 props 的默认值
+ * @param props 组件的 props 定义对象
+ */
+export const buildPropsDefaultValues = <T extends AnyRecord>(
+  props: AnyRecord,
+): T => {
+  let result: T = {} as T;
+  for (const [key, value] of Object.entries(props)) {
+    if (!isFunction(value)) {
+      result = {
+        ...result,
+        ...defineProp(key, value),
+      };
+      continue;
+    }
+
+    result = {
+      ...result,
+      ...defineProp(key, value()),
+    };
+  }
+
+  return result;
 };

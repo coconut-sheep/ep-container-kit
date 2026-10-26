@@ -7,7 +7,6 @@ import type {
   BaseProps,
   BaseSlots,
   FormContainerProvideConfig,
-  PickToRequired,
 } from '@ep-container-kit/types';
 import {
   ElAutocomplete,
@@ -64,11 +63,42 @@ import type {
 } from 'element-plus';
 import type { EmitFn, Ref, VNode } from 'vue';
 import { getComponentName } from '@ep-container-kit/constants';
+import { buildPropsDefaultValues } from '@ep-container-kit/utils';
 
 /**
  * 表单项的组件名
  */
 export const COMPONENT_NAME = getComponentName('FormItem');
+
+export const COMPONENT_DEFAULT_PROPS = buildPropsDefaultValues<FormItemProps>({
+  prop: undefined,
+  label: undefined,
+  rules: () => {
+    return [];
+  },
+  col: undefined,
+  visible: true,
+  hidden: false,
+  type: undefined,
+  itemProps: () => {
+    return {};
+  },
+  itemSlots: () => {
+    return {};
+  },
+  itemRender: undefined,
+  props: () => {
+    return {};
+  },
+  slots: () => {
+    return {};
+  },
+  events: () => {
+    return {};
+  },
+  component: undefined,
+  render: undefined,
+});
 
 /**
  * 组件的插槽类型
@@ -212,33 +242,35 @@ export interface FormItemAny<
 
 /**
  * 使用custom的FormItem配置
- * @description 这里必须用 type 别名而非 interface extends：
- * `PickToRequired` 是映射类型，`interface extends` 无法被 @vue/compiler-sfc 解析，
- * 会导致 `defineProps<FormItemProps>()` 在构建期报 "Failed to resolve extends base type"
  */
-export type FormItemCustom<T extends AnyRecord = AnyRecord> = PickToRequired<
-  FormItemBase<T>,
-  'component'
-> & {
+export interface FormItemCustom<
+  T extends AnyRecord = AnyRecord,
+> extends FormItemBase<T> {
   /**
    * 表单项的类型，必须为custom
    */
   type: 'custom';
-};
+  /**
+   * 表单项的组件，在此类型下必填
+   */
+  component: FormItemBase['component'];
+}
 
 /**
  * 使用render的FormItem配置
- * @description 同 FormItemCustom，使用 type 别名以兼容 @vue/compiler-sfc 的类型解析
  */
-export type FormItemRender<T extends AnyRecord = AnyRecord> = PickToRequired<
-  FormItemBase<T>,
-  'render'
-> & {
+export interface FormItemRender<
+  T extends AnyRecord = AnyRecord,
+> extends FormItemBase<T> {
   /**
    * 表单项的类型，必须为render
    */
   type: 'render';
-};
+  /**
+   * 表单项的渲染函数，在此类型下必填
+   */
+  render: FormItemBase['render'];
+}
 
 /**
  * 使用ElInput组件的FormItem配置
@@ -475,19 +507,3 @@ export type FormContainerItem<T extends AnyRecord = AnyRecord> =
  */
 export type FormItemProps<T extends AnyRecord = AnyRecord> =
   FormContainerItem<T>;
-
-/**
- * 表单项Props的默认值
- */
-export const getComponentDefaultProps = (): FormItemProps => {
-  return {
-    visible: true,
-    hidden: false,
-    rules: [],
-    itemProps: {},
-    itemSlots: {},
-    props: {},
-    slots: {},
-    events: {},
-  };
-};

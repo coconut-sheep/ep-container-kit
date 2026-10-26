@@ -1,6 +1,5 @@
-import type { InjectionKey } from 'vue';
 import type {
-  ConfigProviderProvide,
+  ConfigProvideKey,
   FormContainerProvideConfig,
 } from '@ep-container-kit/types';
 
@@ -8,9 +7,8 @@ import type {
  * 表单相关的 Provide 注入 key
  * @description 由 `CkConfigProvider` 或 `CkFormContainer` 提供，`CkFormItem` 消费
  */
-export const FORM_PROVIDER: InjectionKey<
-  Partial<ConfigProviderProvide<FormContainerProvideConfig>>
-> = Symbol('formProvider');
+export const FORM_PROVIDER: ConfigProvideKey<FormContainerProvideConfig> =
+  Symbol('formProvider');
 
 /**
  * 表单容器 provide 的配置 key 列表

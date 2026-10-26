@@ -11,20 +11,15 @@
     ref,
     useSlots,
     watch,
-    type Component,
-    type PropType,
     type WritableComputedRef,
   } from 'vue';
-  import { hasProp, omitEntryProps } from '@ep-container-kit/utils';
+  import {
+    filterNullishProps,
+    hasProp,
+    omitEntryProps,
+  } from '@ep-container-kit/utils';
   import FormItem from './form-item.vue';
   import { handleFormItemProp } from './utils';
-
-  /**
-   * FormItem 使用运行时 props 声明，其 props 已被收窄为具体对象；
-   * 而这里传入的是 20 个成员的判别联合，直接 `h(FormItem, ...)` 无法匹配重载。
-   * 统一按「动态组件」处理，props 交由运行时 props 校验。
-   */
-  const DynamicFormItem = FormItem as unknown as Component;
 
   defineOptions({
     name: COMPONENT_NAME,
@@ -46,20 +41,22 @@
    * 这里用 `PropType` 只保留编译期类型、运行时仍声明为 Array，
    * 同时 default 复用 `COMPONENT_DEFAULT_PROPS`，避免两处默认值漂移。
    */
-  const props = defineProps({
-    schema: {
-      type: Array as PropType<FormItemSchemaProps<T>['schema']>,
-      default: COMPONENT_DEFAULT_PROPS.schema,
-    },
-  });
-
+  const props = defineProps<FormItemSchemaProps<T>>();
   const slots = useSlots();
+
+  const defaultProps = COMPONENT_DEFAULT_PROPS;
+  const mergedProps = computed<FormItemSchemaProps<T>>(() => {
+    return {
+      ...defaultProps,
+      ...filterNullishProps(props),
+    } as FormItemSchemaProps<T>;
+  });
 
   // 非法prop（空prop / sourceData中不存在的prop）集中告警，仅在schema prop集合变化时触发一次
   watch(
     () => {
       const invalidProps = new Set<string>();
-      for (const item of props.schema) {
+      for (const item of mergedProps.value.schema) {
         const prop = String(handleFormItemProp(item, 'prop', '') ?? '');
         // 空 prop 或 sourceData 中不存在的 prop 都视为非法，去重收集
         if (!prop || !hasProp(sourceData.value, prop)) {
@@ -121,7 +118,7 @@
   const renderContent = () => {
     const validKeys = new Set<string>();
 
-    const nodeList = props.schema.map((item, index) => {
+    const nodeList = mergedProps.value.schema.map((item, index) => {
       const _propKey = handleFormItemProp(item, 'prop', '') as string;
 
       // v-model处理
@@ -141,7 +138,7 @@
       }
 
       return h(
-        DynamicFormItem,
+        FormItem,
         {
           key: _propKey || index,
           ...item,

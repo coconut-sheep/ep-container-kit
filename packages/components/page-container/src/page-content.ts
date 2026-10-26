@@ -1,4 +1,5 @@
 import { getComponentName } from '@ep-container-kit/constants';
+import { buildPropsDefaultValues } from '@ep-container-kit/utils';
 
 /**
  * PageContent 的组件名
@@ -57,11 +58,12 @@ export type PageContentEmits = {
 /**
  * PageContent 的 Props 默认值
  */
-export const COMPONENT_DEFAULT_PROPS = {
-  showBack: false,
-  title: '',
-  bodyClass: '',
-  fullHeight: true,
-  width: '',
-  height: '',
-};
+export const COMPONENT_DEFAULT_PROPS =
+  buildPropsDefaultValues<PageContentProps>({
+    showBack: false,
+    title: '',
+    bodyClass: '',
+    fullHeight: true,
+    width: '',
+    height: '',
+  });

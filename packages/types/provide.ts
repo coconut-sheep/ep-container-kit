@@ -1,5 +1,12 @@
-import type { ComputedRef } from 'vue';
+import type { ComputedRef, InjectionKey } from 'vue';
 import type { AnyRecord } from './tools';
+
+/**
+ * 通过 provide 下发的配置项的类型
+ */
+export type ConfigProvideKey<T extends AnyRecord> = InjectionKey<
+  Partial<ConfigProviderProvide<T>>
+>;
 
 /**
  * 通过 provide 下发的配置对象

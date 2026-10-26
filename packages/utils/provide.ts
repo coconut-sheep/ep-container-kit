@@ -1,6 +1,9 @@
-import type { AnyRecord } from '@ep-container-kit/types';
-import type { ConfigProviderProvide } from '@ep-container-kit/types';
-import { computed } from 'vue';
+import type {
+  ConfigProviderProvide,
+  AnyRecord,
+  ConfigProvideKey,
+} from '@ep-container-kit/types';
+import { computed, inject } from 'vue';
 import { defineProp } from './object';
 import { isNull, isUndefined } from './types';
 
@@ -120,4 +123,19 @@ export const handleInjectValue = <T extends AnyRecord = AnyRecord>(options: {
   });
 
   return result;
+};
+
+/**
+ * 构建 inject 函数，自动处理默认值
+ * @param key 提供 key 值，用于 `inject` 函数
+ * @param defaultValue 默认值，用于 `inject` 函数，若未提供则使用空对象
+ */
+export const buildProviderInject = <T extends AnyRecord>(
+  key: ConfigProvideKey<T>,
+  defaultValue?: T,
+) => {
+  return inject<Partial<ConfigProviderProvide<T>>>(
+    key,
+    defaultValue ?? ({} as T),
+  );
 };
