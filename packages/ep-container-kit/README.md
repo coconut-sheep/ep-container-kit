@@ -57,14 +57,15 @@ import 'ep-container-kit/dist/index.css';
 
 ## 组件
 
-| 组件               | 说明                                                |
-| ------------------ | --------------------------------------------------- |
-| `CkConfigProvider` | 全局配置提供器，通过 provide/inject 下发表单配置    |
-| `CkFormContainer`  | 表单容器，`ElForm` 的轻量封装，支持 Schema 渲染     |
-| `CkFormItem`       | 表单项，`ElFormItem` 的轻量封装，可脱离容器单独使用 |
-| `CkFormItemSchema` | `CkFormItem` 的 Schema 批量渲染实现                 |
-| `CkPageContainer`  | 页面容器，铺满父级并承担滚动                        |
-| `CkPageContent`    | 页面内容区，标题栏 + 内容区两段式布局，支持返回按钮 |
+| 组件               | 说明                                                         |
+| ------------------ | ------------------------------------------------------------ |
+| `CkConfigProvider` | 全局配置提供器，通过 provide/inject 下发表单配置             |
+| `CkFormContainer`  | 表单容器，`ElForm` 的轻量封装，支持 Schema 渲染              |
+| `CkFormItem`       | 表单项，`ElFormItem` 的轻量封装，可脱离容器单独使用          |
+| `CkFormItemSchema` | `CkFormItem` 的 Schema 批量渲染实现                          |
+| `CkPageContainer`  | 页面容器，铺满父级并承担滚动                                 |
+| `CkPageContent`    | 页面内容区，标题栏 + 内容区两段式布局，支持返回按钮          |
+| `CkPagination`     | 分页器，两套基本单元由 `compact` 切换，数据由 `v-model` 提供 |
 
 ### 表单
 
@@ -113,6 +114,49 @@ import 'ep-container-kit/dist/index.css';
 返回按钮图标默认使用 Element Plus 的 `ArrowLeft`，`#back-icon` 插槽可整体替换。
 
 页面容器依赖父级存在确定高度（`height: 100%` 才有参照），样式只使用 Element Plus 主题变量，不含玻璃拟态效果。
+
+### 分页
+
+```vue
+<script setup lang="ts">
+  import { ref } from 'vue';
+  import type { PaginationConfig } from 'ep-container-kit';
+  import { CkPagination, getDefaultPaginationConfig } from 'ep-container-kit';
+
+  const pagination = ref<PaginationConfig>({
+    ...getDefaultPaginationConfig(),
+    pageTotal: 0,
+  });
+</script>
+
+<template>
+  <CkPagination v-model="pagination" @change="fetchList" />
+</template>
+```
+
+`v-model` 绑定 `PaginationConfig`（`current` / `pageSize` / `pageSizes` / `pageTotal` / `layouts`），
+写回同样是**就地修改**，`@change` 在 `nextTick` 后派发、参数为最新配置。每页条数变更会自动回到第一页。
+`size`、`hideOnSinglePage` 等未声明的属性直接透传到分页器（紧凑形态除外，见下）。
+
+组件内部有两套「基本单元」：非紧凑形态交给 Element Plus 分页器渲染，紧凑形态用组件内的等义实现。
+`compact` 只决定**由哪套单元渲染**，两套读同一份 `layouts`，入参一字不改：
+
+```vue
+<CkPagination
+  v-model="pagination"
+  compact
+  show-load-more
+  :loaded-count="list.length"
+  @load-more="fetchNextPage"
+/>
+```
+
+- `compact`：切到自研单元，`sizes` 由下拉框换成 `- 10 条/页 +` 步进器，页码与翻页尺寸同步收窄
+- `show-load-more`：追加「加载更多 + 已加载 / 总数」，`loadMore` 只表达意图，取数由调用方完成
+- 需要 `slot` 片段时会自动补上，宿主不必自己拼 `layouts`
+
+布局默认右对齐、`min-height: 50px`（紧凑形态为居中、高度贴合内容）。
+用 `--ck-pagination-justify` / `--ck-pagination-min-height` 覆盖，不必与组件样式争抢特异性。
 
 ## 产物
 

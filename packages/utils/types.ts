@@ -138,6 +138,11 @@ export const isSizeValue = (value: string): value is string => {
  * ```
  */
 export const toSizeValue = (value: AnyValue, unit: string = 'px'): string => {
+  // 针对非0的不合法值的处理
+  if (!value && value !== 0) {
+    return '';
+  }
+
   // 尝试将值转换为数字
   const _value = Number(value);
 

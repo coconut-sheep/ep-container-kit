@@ -19,6 +19,12 @@ const router = createRouter({
       component: () => import('@/views/PageDemo.vue'),
       meta: { title: '页面容器' },
     },
+    {
+      path: '/pagination',
+      name: 'pagination',
+      component: () => import('@/views/PaginationDemo.vue'),
+      meta: { title: '分页' },
+    },
   ],
 });
 

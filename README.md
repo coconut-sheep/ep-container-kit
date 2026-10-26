@@ -42,6 +42,7 @@
 | `CkFormItemSchema` | `CkFormItem` 的 Schema 批量渲染实现                                                         |
 | `CkPageContainer`  | 页面容器，铺满父级并承担滚动，作为页面根节点                                                |
 | `CkPageContent`    | 页面内容区，提供「标题栏 + 内容区」两段式布局，支持 `show-back` 返回按钮                    |
+| `CkPagination`     | 分页器，两套基本单元由 `compact` 切换，数据由 `v-model` 提供                                |
 
 ---
 
@@ -380,6 +381,145 @@ const schema: FormContainerItem<UserForm>[] = [
 
 ---
 
+## 分页
+
+`CkPagination` 封装 Element Plus 的分页器，把「页码 / 每页条数 / 总条数 / 布局」收敛成一个对象，由 `v-model` 进出，列表页只需要关心一处状态。
+
+```vue
+<script setup lang="ts">
+  import { ref } from 'vue';
+  import type { PaginationConfig } from 'ep-container-kit';
+  import { CkPagination, getDefaultPaginationConfig } from 'ep-container-kit';
+
+  const list = ref([]);
+  // 从工具函数取一份初始配置，避免各处手写字段
+  const pagination = ref<PaginationConfig>({
+    ...getDefaultPaginationConfig(),
+    pageTotal: 0,
+  });
+
+  const handleChange = async (config: PaginationConfig) => {
+    // config 此时已是最新值，直接用它请求即可
+    const res = await fetchList({ current: config.current });
+    list.value = res.rows;
+    pagination.value.pageTotal = res.total;
+  };
+</script>
+
+<template>
+  <el-table :data="list" />
+  <CkPagination v-model="pagination" @change="handleChange" />
+</template>
+```
+
+### 数据契约
+
+`v-model` 的值为 `PaginationConfig`：
+
+| 字段        | 类型                 | 说明                                                         |
+| ----------- | -------------------- | ------------------------------------------------------------ |
+| `current`   | `number`             | 当前页码，从 1 开始                                          |
+| `pageSize`  | `number`             | 每页条数                                                     |
+| `pageSizes` | `number[]`           | 每页条数的可选项，重复项自动去重                             |
+| `pageTotal` | `number`             | 数据总条数                                                   |
+| `layouts`   | `PaginationLayout[]` | 布局片段，重复项自动去重；支持 `->` 占位与 `slot` 自定义内容 |
+
+### 属性
+
+| 属性           | 类型      | 默认值  | 说明                                                          |
+| -------------- | --------- | ------- | ------------------------------------------------------------- |
+| `compact`      | `boolean` | `false` | 是否启用紧凑形态；只切换渲染单元，入参不变                    |
+| `disabled`     | `boolean` | `false` | 是否禁用分页器                                                |
+| `background`   | `boolean` | `true`  | 页码按钮是否带背景色                                          |
+| `pagerCount`   | `number`  | `5`     | 页码按钮数量，超过则折叠为省略号，取值 5–21（偶数向上取奇数） |
+| `showLoadMore` | `boolean` | `false` | 是否显示「加载更多」与「已加载 / 总数」                       |
+| `loadedCount`  | `number`  | `0`     | 已加载条数，配合 `showLoadMore` 判断是否还有更多              |
+| `loading`      | `boolean` | `false` | 加载中状态，「加载更多」按钮呈现 loading 且不可点击           |
+
+事件：`change`（参数为最新 `PaginationConfig`）、`loadMore`（点击「加载更多」）。
+
+### 两套基本单元
+
+组件内部有两套「基本单元」：一套是 Element Plus 分页器自带的片段，一套是组件内的等义实现。`compact` 只决定**由哪一套来渲染**——两套消费完全相同的入参，同一份 `PaginationConfig`、同一份 `layouts`，片段名、顺序与含义一一对应：
+
+| 片段     | 非紧凑（Element Plus 单元）  | 紧凑（自研单元）             |
+| -------- | ---------------------------- | ---------------------------- |
+| `total`  | `Total 100`                  | 同左，跟随 Element Plus 语言 |
+| `sizes`  | 每页条数下拉框               | `− 10 条/页 +` 步进器        |
+| `prev`   | 上一页图标按钮               | 同左                         |
+| `pager`  | 页码 + 折叠省略号            | 同样的折叠规则，尺寸更小     |
+| `next`   | 下一页图标按钮               | 同左                         |
+| `jumper` | 前往 N 页                    | 同左，输入框更窄             |
+| `slot`   | 加载更多 / 已加载 / `#extra` | 同左                         |
+| `->`     | 撑开两侧                     | 同左                         |
+
+所以「换形态」不涉及任何参数改写，加一个 `compact` 就够了：
+
+```vue
+<!-- 列表页底部：完整分页条 -->
+<CkPagination v-model="pagination" @change="fetchList" />
+
+<!-- 下拉面板：同一份配置，只差 compact；面板里没有翻页的位置，所以布局只留条数 -->
+<CkPagination
+  v-model="pagination"
+  compact
+  show-load-more
+  :loaded-count="list.length"
+  :loading="loading"
+  @load-more="fetchNextPage"
+  @change="resetAndFetch"
+/>
+
+<script setup lang="ts">
+  const pagination = ref<PaginationConfig>({
+    ...getDefaultPaginationConfig(),
+    layouts: ['sizes'], // 面板里不需要页码
+  });
+</script>
+```
+
+`layouts` 是唯一的布局声明，两套单元都按它的顺序排布；需要内嵌内容时组件会自动补 `slot` 片段（已经写了的不重复追加），宿主不必自己拼字符串。
+
+步进器按 `pageSizes` 的**数值顺序**移动（与下拉框的展示顺序无关），当前值不在候选列表里时也能正常增减——不存在「两端同时禁用、调不回去」的情况。
+
+`#extra` 插槽可以往同一行里再塞自定义内容（按钮、筛选器），位置在加载更多之后：
+
+```vue
+<CkPagination
+  v-model="pagination"
+  compact
+  :layouts="['sizes', 'prev', 'pager', 'next']"
+>
+  <template #extra>
+    <el-button link @click="refresh">刷新</el-button>
+  </template>
+</CkPagination>
+```
+
+### 行为约定
+
+- **就地写回，不派发 `update:modelValue`**：组件直接改 `v-model` 传入对象的 `current` / `pageSize`，与 `CkFormContainer` 的数据写回方式一致。父级持有的是同一个对象引用，因此 `v-model` 照常生效；需要监听变化请用 `@change` 或 `watch` 该对象本身。
+- **条数变更回到第一页**：`pageSize` 改变后原页码大概率越界，统一重置 `current = 1`。下拉选择与步进器共用这一条路径。
+- **`change` 在 `nextTick` 中派发**：确保回调里读到的配置已是最新值。
+- **`loadMore` 只表达意图**：组件不取数，是否还有更多由 `loadedCount < pageTotal` 决定。
+- **非紧凑形态直接透传属性**：`size`、`hideOnSinglePage`、`small`、`popperClass` 等未声明的属性会落到分页器根元素上，与直接写 `el-pagination` 等价。紧凑形态是自研单元，不识别这些属性，只接管 `class` 与 `style`。
+
+布局默认右对齐、`min-height: 50px`（紧凑形态为居中、高度贴合内容）。这两项走 CSS 变量，覆盖时不必与组件样式争抢特异性：
+
+| 变量                         | 默认值                          | 说明             |
+| ---------------------------- | ------------------------------- | ---------------- |
+| `--ck-pagination-justify`    | `flex-end`（紧凑形态 `center`） | 分页条的水平对齐 |
+| `--ck-pagination-min-height` | `50px`（紧凑形态 `auto`）       | 分页条最小高度   |
+
+```vue
+<CkPagination
+  v-model="pagination"
+  style="--ck-pagination-justify: flex-start"
+/>
+```
+
+---
+
 ## 全局配置：表单项
 
 `CkConfigProvider` 向整棵组件树注入表单项的全局配置，子组件无需逐个透传即可统一生效。
@@ -507,6 +647,7 @@ ep-container-kit/
 │   │   ├── config-provider/
 │   │   ├── form-container/
 │   │   ├── page-container/    # CkPageContainer + CkPageContent
+│   │   ├── pagination/        # CkPagination
 │   │   └── index.ts
 │   ├── constants/             # @ep-container-kit/constants（常量、InjectionKey）
 │   ├── types/                 # @ep-container-kit/types（公共类型）
@@ -517,7 +658,7 @@ ep-container-kit/
 │       ├── vite.config.ts
 │       └── dist/
 ├── example/                   # @ep-container-kit/example（演示与调试，不发布）
-│   └── src/views/             # FormDemo.vue / PageDemo.vue
+│   └── src/views/             # FormDemo.vue / PageDemo.vue / PaginationDemo.vue
 ├── tsconfig.json
 ├── tsconfig.node.json
 └── pnpm-workspace.yaml

@@ -1,6 +1,7 @@
 export * from './config-provider';
 export * from './form-container';
 export * from './page-container';
+export * from './pagination';
 
 import { CkConfigProvider } from './config-provider';
 import {
@@ -9,6 +10,7 @@ import {
   CkFormItemSchema,
 } from './form-container';
 import { CkPageContainer, CkPageContent } from './page-container';
+import { CkPagination } from './pagination';
 
 /**
  * 组件库所有组件列表
@@ -21,4 +23,5 @@ export const components = [
   CkFormItemSchema,
   CkPageContainer,
   CkPageContent,
+  CkPagination,
 ];
