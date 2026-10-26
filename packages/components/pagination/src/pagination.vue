@@ -19,13 +19,7 @@
     omitEntryProps,
     pickEntryProps,
   } from '@ep-container-kit/utils';
-  import {
-    ArrowLeft,
-    ArrowRight,
-    Minus,
-    Plus,
-    Right,
-  } from '@element-plus/icons-vue';
+  import { ArrowLeft, ArrowRight, Minus, Plus } from '@element-plus/icons-vue';
 
   defineOptions({
     inheritAttrs: false,
@@ -40,9 +34,6 @@
   });
 
   const props = withDefaults(defineProps<PaginationProps>(), {
-    // 这里必须再声明一次，不能只依赖 `getComponentDefaultProps()`：
-    // `background` 是 Boolean prop，Vue 在调用方未传时给出的运行时默认值是 `false`，
-    // 它会在 `filterNullishProps` 之后覆盖掉合并进来的 `true`，导致 background 永远为假
     background: true,
     compact: false,
     stream: false,
@@ -298,17 +289,13 @@
       @update:current-page="updateCurrentPage"
       @update:page-size="updatePageSize"
     >
-      <!--
-        Element Plus 的 `slot` 片段已被本组件占用：`loadMore` 翻译成 `slot` 后落在这里，
-        因此默认插槽不再对外暴露自定义内容
-      -->
       <pagination-load-more
         v-if="isStream"
+        class="pagination--loadmore is-slot"
         :loaded="mergedProps.loaded ?? 0"
         :total="modelValue.total"
         :loading="Boolean(mergedProps.loading)"
         :disabled="!isOperable"
-        :able="loadMoreAble"
         @load-more="handleLoadMore"
       />
     </el-pagination>
@@ -316,13 +303,12 @@
   <template v-else>
     <div
       v-bind="mergedAttrs"
-      class="pagination-container pagination-container--compact"
-      :class="{ 'is-background': mergedProps.background }"
+      class="el-pagination pagination-container pagination-container--compact"
     >
       <template v-for="(item, index) in mergedLayout" :key="`${item}-${index}`">
         <el-button
           v-if="item === 'prev'"
-          class="pagination--prev"
+          class="pagination-item pagination--prev"
           :disabled="!isOperable || isFirstPage"
           link
           @click.stop="handlePagePrev"
@@ -331,12 +317,18 @@
             <component :is="prevIcon" />
           </el-icon>
         </el-button>
-        <div v-if="item === 'pager'" class="pagination--pager">
+        <div
+          v-if="item === 'pager'"
+          class="pagination-item pagination--pager"
+          :class="{
+            'is-disabled': !isOperable,
+          }"
+        >
           {{ `${modelValue.currentPage || 0}` }}
         </div>
         <el-button
           v-if="item === 'next'"
-          class="pagination--next"
+          class="pagination-item pagination--next"
           :disabled="!isOperable || isLastPage"
           link
           @click.stop="handlePageNext"
@@ -345,37 +337,45 @@
             <component :is="nextIcon" />
           </el-icon>
         </el-button>
-        <!--
-          `loadMore` 是一个复合片段：加载更多按钮 + 已加载 / 总数量，
-          与非紧凑形态共用同一个内部组件，保证两种形态下 markup 与状态判定完全一致
-        -->
         <pagination-load-more
           v-if="item === 'loadMore'"
+          class="pagination-item"
           :loaded="mergedProps.loaded ?? 0"
           :total="modelValue.total"
           :loading="Boolean(mergedProps.loading)"
           :disabled="!isOperable"
-          :able="loadMoreAble"
           @load-more="handleLoadMore"
         />
-        <!-- 流式加载时 `total` 已被 handleLayout 剔除，这里只剩普通分页的计数 -->
-        <div v-if="item === 'total'" class="pagination--total">
-          {{ `共 ${modelValue.total} 条` }}
-        </div>
         <div
-          v-if="item === 'sizes'"
-          class="pagination--sizes"
+          v-if="item === 'total'"
+          class="pagination-item pagination--total"
           :class="{
             'is-disabled': !isOperable,
           }"
         >
-          <el-icon @click.stop="handlePageSizePrev"><Minus /></el-icon>
-          <div>{{ `${modelValue.pageSize || 0} 条/页` }}</div>
-          <el-icon @click.stop="handlePageSizeNext"><Plus /></el-icon>
+          {{ `共 ${modelValue.total} 条` }}
+        </div>
+        <div
+          v-if="item === 'sizes'"
+          class="pagination-item pagination--sizes"
+          :class="{
+            'is-disabled': !isOperable,
+          }"
+          :title="isStream ? '单次加载数量' : ''"
+        >
+          <el-icon @click.stop="handlePageSizePrev">
+            <Minus />
+          </el-icon>
+          <div>
+            {{ `${modelValue.pageSize || 0} 条/${isStream ? '次' : '页'}` }}
+          </div>
+          <el-icon @click.stop="handlePageSizeNext">
+            <Plus />
+          </el-icon>
         </div>
         <div
           v-if="item === 'jumper'"
-          class="pagination--jumper"
+          class="pagination-item pagination--jumper"
           :class="{
             'is-disabled': !isOperable,
           }"
@@ -398,212 +398,80 @@
 
   @include ck-border-box;
 
-  .pagination-container {
+  .pagination-container--compact {
     display: flex;
     align-items: center;
+    --pagination-item-gap: 5px;
+    gap: var(--pagination-item-gap);
 
-    // 非紧凑形态里本组件只贡献 loadMore 一个片段：Element Plus 给每个内建片段加了
-    // `margin-left: item-gap`，并靠 `is-first` 清掉首个；slot 内容是 vnode 数组，
-    // 拿不到 `is-first` / `is-last`，这里手动补一份，并对首个元素归零
-    &:not(.pagination-container--compact) .pagination-loadmore {
-      margin-left: var(--el-pagination-item-gap);
-    }
-
-    &:not(.pagination-container--compact) .pagination-loadmore:first-child {
-      margin-left: 0;
-    }
-
-    // 未开启 background 时，Element Plus 的单元是透明底 + 主色 hover 文字，
-    // loadMore 按钮跟随同一语义（子组件内部元素，需 :deep 穿透）
-    &:not(.is-background) .pagination-loadmore {
-      :deep(.el-button) {
-        --el-button-bg-color: transparent;
-        --el-button-hover-bg-color: var(--el-fill-color-light);
-        --el-button-active-bg-color: var(--el-fill-color-light);
-        --el-button-disabled-bg-color: transparent;
-      }
-    }
-  }
-
-  // 紧凑形态：整行是一条 flex，所有单元共用同一高度、圆角与间距，
-  // 避免按钮、页码、条数、跳转框各按自身默认尺寸渲染而高低参差
-  .pagination-container--compact {
-    // 紧凑形态的根节点不是 .el-pagination，拿不到 Element Plus 声明在 .el-pagination 上的
-    // 分页变量，这里按 EP 的默认值补一份。变量名全部沿用 EP（不新增自定义变量），
-    // 宿主覆盖 --el-pagination-* 时两种形态仍保持一致
-    --el-pagination-font-size: 14px;
-    --el-pagination-border-radius: 2px;
-    --el-pagination-button-width: 32px;
-    --el-pagination-button-height: 32px;
-    --el-pagination-bg-color: var(--el-fill-color-blank);
-    --el-pagination-button-color: var(--el-text-color-primary);
-    --el-pagination-button-bg-color: var(--el-fill-color);
-    --el-pagination-button-disabled-color: var(--el-text-color-placeholder);
-    --el-pagination-button-disabled-bg-color: var(--el-fill-color-blank);
-    --el-pagination-hover-color: var(--el-color-primary);
-
-    column-gap: 8px;
-
-    > * {
-      flex: none;
-    }
-
-    // 上一个 / 下一个：尺寸、圆角、颜色全部对齐 Element Plus 的 .btn-prev / .btn-next，
-    // 只把 el-button 默认的白底描边与 15px 内边距换掉
-    .pagination--prev,
-    .pagination--next {
-      width: var(--el-pagination-button-width);
-      min-width: var(--el-pagination-button-width);
-      height: var(--el-pagination-button-height);
-      margin: 0;
-      padding: 0;
-      border-radius: var(--el-pagination-border-radius);
-
-      --el-button-bg-color: var(--el-pagination-bg-color);
-      --el-button-border-color: transparent;
-      --el-button-text-color: var(--el-pagination-button-color);
-      --el-button-hover-bg-color: var(--el-pagination-bg-color);
-      --el-button-hover-border-color: transparent;
-      --el-button-hover-text-color: var(--el-pagination-hover-color);
-      --el-button-active-bg-color: var(--el-pagination-bg-color);
-      --el-button-active-border-color: transparent;
-      --el-button-disabled-bg-color: var(
-        --el-pagination-button-disabled-bg-color
-      );
-      --el-button-disabled-border-color: transparent;
-      --el-button-disabled-text-color: var(
-        --el-pagination-button-disabled-color
-      );
-
-      .el-icon {
-        font-size: 12px;
-        font-weight: 700;
-      }
-    }
-
-    // 页码：只显示当前页。非 background 下 EP 的 .is-active 是主色文字加粗，
-    // 所以默认按这个语义渲染，灰底白字的色块放到 .is-background 分支
-    .pagination--pager {
+    .pagination-item {
       display: flex;
       align-items: center;
       justify-content: center;
-      min-width: var(--el-pagination-button-width);
+      width: fit-content;
       height: var(--el-pagination-button-height);
-      padding: 0 4px;
-      border-radius: var(--el-pagination-border-radius);
-      color: var(--el-pagination-hover-color);
-      font-size: var(--el-pagination-font-size);
-      font-weight: 700;
-      font-variant-numeric: tabular-nums;
-    }
+      margin: 0;
+      padding: 0;
 
-    // 条数步进：与按钮同高，左右留 8px 内边距撑开点击区域
-    .pagination--sizes {
-      display: flex;
-      align-items: center;
-      column-gap: 6px;
-      height: var(--el-pagination-button-height);
-      padding: 0 8px;
-      border-radius: var(--el-pagination-border-radius);
-      background-color: var(--el-pagination-bg-color);
-      color: var(--el-pagination-button-color);
-      font-size: var(--el-pagination-font-size);
-      font-variant-numeric: tabular-nums;
-      white-space: nowrap;
+      &.is-disabled {
+        cursor: not-allowed;
+        color: var(--el-pagination-button-disabled-color);
+      }
 
       .el-icon {
-        font-size: 12px;
+        font-size: 16px;
         cursor: pointer;
 
         &:hover {
           color: var(--el-pagination-hover-color);
         }
       }
+    }
+
+    .pagination--prev,
+    .pagination--next {
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .pagination--pager {
+      padding: 0 4px;
+      font-size: var(--el-pagination-font-size);
+    }
+
+    .pagination--sizes {
+      column-gap: 6px;
+      padding: 0 8px;
+      border-radius: var(--el-pagination-border-radius);
+      background-color: var(--el-pagination-bg-color);
+      font-size: var(--el-pagination-font-size);
+      border: 1px solid var(--el-border-color);
 
       &.is-disabled {
-        color: var(--el-pagination-button-disabled-color);
-        background-color: var(--el-pagination-button-disabled-bg-color);
-        cursor: not-allowed;
-
-        .el-icon {
-          cursor: not-allowed;
-          pointer-events: none;
-        }
+        background: var(--el-disabled-bg-color);
       }
     }
 
-    // 跳转：输入框跟随整行高度（默认 32px），不再用 24px 的 small 尺寸
     .pagination--jumper {
-      display: flex;
-      align-items: center;
-      height: var(--el-pagination-button-height);
-
-      // 宽度只留出 3~4 位页码的空间：后缀按钮约占 34px，其余才是输入区，
-      // 再宽会让整行被一个数字输入框撑开
       .el-input {
         width: 75px;
-        --el-input-height: var(--el-pagination-button-height);
-        --el-input-border-radius: var(--el-pagination-border-radius);
+        height: 100%;
       }
 
-      // 页码在输入框里居中，与 Element Plus 分页的 jump 行为一致
       :deep(.el-input__inner) {
         text-align: center;
       }
+    }
 
-      // 后缀按钮是输入框的一部分：去掉自身边框与背景，但保留左右内边距，
-      // 否则图标会贴边、可点击区域也会缩到只有图标本身
-      :deep(.el-input-group__append) {
-        padding: 0 4px;
-
-        .el-button {
-          min-height: 100%;
-          padding: 0 6px;
-          border: none;
-          background: transparent;
-          font-size: 14px;
-
-          .el-icon {
-            font-size: 14px;
-          }
-        }
+    .pagination--loadmore {
+      &.is-slot {
+        margin-left: var(--pagination-item-gap);
       }
     }
 
-    // 总条数
     .pagination--total {
-      display: flex;
-      align-items: center;
-      height: var(--el-pagination-button-height);
       color: var(--el-text-color-regular);
       font-size: var(--el-pagination-font-size);
-      font-variant-numeric: tabular-nums;
-      white-space: nowrap;
-    }
-
-    // 开启 background 时切到 EP 的色块语义：单元灰底、当前页主色块白字
-    &.is-background {
-      .pagination--prev,
-      .pagination--next {
-        --el-button-bg-color: var(--el-pagination-button-bg-color);
-        --el-button-hover-bg-color: var(--el-fill-color-dark);
-        --el-button-active-bg-color: var(--el-fill-color-dark);
-        --el-button-disabled-bg-color: var(--el-disabled-bg-color);
-      }
-
-      .pagination--pager {
-        background-color: var(--el-color-primary);
-        color: var(--el-color-white);
-        font-weight: 400;
-      }
-
-      .pagination--sizes {
-        background-color: var(--el-pagination-button-bg-color);
-
-        &.is-disabled {
-          background-color: var(--el-disabled-bg-color);
-        }
-      }
     }
   }
 </style>

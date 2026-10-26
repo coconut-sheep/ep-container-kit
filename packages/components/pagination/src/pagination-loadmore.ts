@@ -34,12 +34,6 @@ export type PaginationLoadMoreProps = {
    * @default false
    */
   disabled?: boolean;
-  /**
-   * 是否还有更多
-   * @description 为 `false` 时按钮禁用并提示「没有更多了」
-   * @default true
-   */
-  able?: boolean;
 };
 
 /**

@@ -36,15 +36,6 @@ export type InvalidPropKey =
   | 'layout';
 
 /**
- * 编译期校验：`InvalidPropKey` 必须全部是 `ElPaginationProps` 的真实 key
- * @description 纯类型声明，不产出运行时值；任一项写错、或 Element Plus 改了 prop 名，
- * 这里会直接报类型错误，而不是等到 `Omit` 静默失效
- */
-export type AssertInvalidPropKey<
-  T extends keyof ElPaginationProps = InvalidPropKey,
-> = T;
-
-/**
  * ElPagination 中在本组件无效的 Props
  * @description 分两类：前 6 个是被**直接移除**的（避免误写），后 5 个是被**整合进 modelValue** 的，
  * 后者只能通过 v-model 传入，写成 prop 不会再生效（如 EP 默认的 `layout` 字符串会盖掉配置里的数组）
@@ -124,14 +115,7 @@ export type PaginationProps = {
  * 不再对外暴露，因此不在取值范围内
  */
 export type PaginationLayout =
-  | 'total'
-  | 'sizes'
-  | 'prev'
-  | 'pager'
-  | 'next'
-  | 'jumper'
-  | '->'
-  | 'loadMore';
+  'total' | 'sizes' | 'prev' | 'pager' | 'next' | 'jumper' | '->' | 'loadMore';
 
 /**
  * 分页配置对象
@@ -189,11 +173,6 @@ export const getComponentDefaultProps = (): PaginationProps => {
   return {
     ...omitEntryProps(getPropsDefaultValue(ElPagination.props), [
       ...INVALID_PROPS,
-      // `prevIcon` / `nextIcon` 的默认值是工厂函数 `() => ArrowLeft`，
-      // 只有写在 prop 声明里才会被 Vue 视作工厂调用；一旦被 `getPropsDefaultValue` 取出来
-      // 当作**值**传递，它就是个普通函数，`resolveDynamicComponent` 会把它当函数式组件执行、
-      // 拿到的是组件对象而非 vnode，箭头图标会静默消失。
-      // 因此不注入默认值，交给 EP（非紧凑分支）与模板（紧凑分支）各自兜底。
       'prevIcon',
       'nextIcon',
     ]),
