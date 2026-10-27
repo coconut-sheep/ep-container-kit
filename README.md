@@ -609,17 +609,20 @@ import type {
   FormContainerProps,
   FormContainerInstance,
   FormContainerEmits,
+  FormContainerEmitsTuple, // 事件名 → 参数元组
   FormItemBase,
   FormItemProps,
   FormItemSchemaProps,
   ConfigProviderProps,
   ConfigProviderProvide,
   FormContainerProvideConfig,
+  BaseDefaultPropsSource, // 默认值源：对象/数组成员必须是工厂函数
   AnyRecord,
   AnyValue,
   Arrayable,
   ValueOfRecord,
-  EmitsToTuples,
+  EmitsToTuples, // 函数签名 → 参数元组
+  TuplesToEmits, // 参数元组 → 函数签名
 } from 'ep-container-kit';
 ```
 
@@ -633,6 +636,35 @@ const schema: FormContainerItem<UserForm>[] = [
   // { prop: 'name', ... }  // 编译期报错：'name' 不在 UserForm 中
 ];
 ```
+
+### 事件类型：元组 ↔ 函数签名
+
+Vue 的 `defineEmits` 支持两种声明形态：**参数元组**（`{ submit: [] }`）与**函数签名**（`{ submit(): void }`）。本库统一用元组声明事件，两个方向各有一个工具类型可以互转：
+
+```ts
+import type { EmitsToTuples, TuplesToEmits } from 'ep-container-kit';
+
+// 函数签名 → 参数元组：元组形态可直接交给 defineEmits
+type Emits = { submit: () => void; validate: (prop: string, ok: boolean) => void };
+type EmitsTuple = EmitsToTuples<Emits>; // { submit: []; validate: [prop: string, ok: boolean] }
+
+// 参数元组 → 函数签名：用于标注监听器、组件实例方法等
+type Listeners = TuplesToEmits<EmitsTuple>; // { submit: () => void; validate: (prop: string, ok: boolean) => void }
+```
+
+`FormContainerEmits` 正是这样推导出来的——`TuplesToEmits<FormContainerEmitsTuple>`。监听器用同一个工具标注，参数顺序与 emit 声明天然一致：
+
+```ts
+import type { FormContainerEmitsTuple, TuplesToEmits } from 'ep-container-kit';
+
+type ValidateListener = TuplesToEmits<FormContainerEmitsTuple>['validate'];
+
+const handleValidate: ValidateListener = (prop, isValid, message) => {
+  // prop / isValid / message 均由元组声明推导，顺序写错会直接报错
+};
+```
+
+两者都是同态映射，成员的 `?` 可选性与 JSDoc 注释会被原样保留；只需关注「元组 ↔ 函数」这一层转换，不必维护两份事件声明。
 
 ---
 
@@ -750,6 +782,12 @@ npm publish        # publishConfig.access = public
 **Q：`defineProps` 为什么是运行时声明而不是类型声明？**
 
 `FormItemProps` 是 20 个成员的判别联合，`defineProps<T>()` 要求 `@vue/compiler-sfc` 在构建期把它翻译成运行时 props，解析该联合会无限递归（`RangeError: Maximum call stack size exceeded`）。因此 `CkFormItem` / `CkFormItemSchema` 显式声明运行时 props，再断言回类型，对外暴露的 Schema 类型不受影响。
+
+**Q：为什么组件的默认值要写成工厂函数？`BaseDefaultPropsSource` 是什么？**
+
+`withDefaults` 第二个参数的类型是 Vue 的 `InferDefaults<T>`：原始类型（`string` / `number` / `boolean` 等）允许直接写裸值，**对象与数组必须写成工厂函数**。这不是风格偏好——裸对象默认值会被所有组件实例共享，实例 A 改了它，实例 B 也会看到；工厂函数才能保证每个实例各拿一份新对象。
+
+`BaseDefaultPropsSource<T>` 就是这条规则的类型表达：按成员逐个判断，对象/数组要求工厂、原始值要求裸值，写错在编译期就会报错，且产物可以直接交给 `withDefaults`。组件内部因此统一用 `COMPONENT_DEFAULT_PROPS_SOURCE`（源形态）声明默认值，需要已求值的裸值形态时再用 `buildPropsDefaultValues(...)` 转换——一份声明，两种形态，不会各自漂移。
 
 **Q：为什么 `class` 和事件落在了内层 `el-form-item` 上？**
 

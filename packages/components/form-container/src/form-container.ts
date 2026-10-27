@@ -22,6 +22,7 @@ export const COMPONENT_DEFAULT_PROPS_SOURCE: BaseDefaultPropsSource<FormContaine
   {
     ...getPropsDefaultValue(ElForm.props),
     itemMinWidth: 0,
+    vertical: false,
   };
 
 export const COMPONENT_DEFAULT_PROPS =

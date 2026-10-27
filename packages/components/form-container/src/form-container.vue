@@ -20,6 +20,7 @@
   } from '@ep-container-kit/utils';
   import {
     COMPONENT_DEFAULT_PROPS,
+    COMPONENT_DEFAULT_PROPS_SOURCE,
     COMPONENT_NAME,
     type FormContainerEmitsTuple,
     type FormContainerProps,
@@ -38,7 +39,10 @@
     },
   });
 
-  const props = defineProps<FormContainerProps<T>>();
+  const props = withDefaults(
+    defineProps<FormContainerProps<T>>(),
+    COMPONENT_DEFAULT_PROPS_SOURCE,
+  );
   const emits = defineEmits<FormContainerEmitsTuple>();
   const attrs = useAttrs();
 

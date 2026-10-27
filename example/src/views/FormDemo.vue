@@ -4,8 +4,10 @@
   import {
     CkConfigProvider,
     CkFormContainer,
+    type FormContainerEmitsTuple,
     type FormContainerInstance,
     type FormContainerItem,
+    type TuplesToEmits,
   } from 'ep-container-kit';
 
   type DemoForm = {
@@ -56,6 +58,21 @@
 
   const sourceJson = computed(() => JSON.stringify(source.value, null, 2));
 
+  /**
+   * `TuplesToEmits` 把「事件名 → 参数元组」转成「事件名 → 函数签名」，
+   * 组件内部的 `FormContainerEmits` 正是由 `FormContainerEmitsTuple` 这样推导而来。
+   * 用它标注监听器，参数类型与 emit 声明天然一致，不会写错顺序。
+   */
+  type ValidateListener = TuplesToEmits<FormContainerEmitsTuple>['validate'];
+
+  const validateLog = ref('');
+
+  const handleValidate: ValidateListener = (prop, isValid, message) => {
+    validateLog.value = isValid
+      ? `${String(prop)}：校验通过`
+      : `${String(prop)}：${message}`;
+  };
+
   const handleSubmit = async () => {
     submitting.value = true;
     try {
@@ -81,7 +98,9 @@
         <code>CkConfigProvider</code>
         +
         <code>CkFormContainer</code>
-        的 Schema 驱动表单，右侧实时回显源数据。
+        的 Schema 驱动表单，右侧实时回显源数据；在输入框内回车提交可看到
+        <code>@validate</code>
+        事件回显。
       </p>
     </header>
 
@@ -93,6 +112,8 @@
             v-model="source"
             :schema="schema"
             vertical
+            @submit="handleSubmit"
+            @validate="handleValidate"
           />
         </CkConfigProvider>
         <div class="form-demo__actions">
@@ -106,6 +127,13 @@
       <div class="form-demo__panel">
         <h2 class="form-demo__subtitle">源数据</h2>
         <pre class="form-demo__code">{{ sourceJson }}</pre>
+        <h2 class="form-demo__subtitle form-demo__subtitle--spaced">
+          校验事件
+          <span class="form-demo__hint">@validate</span>
+        </h2>
+        <p class="form-demo__event">
+          {{ validateLog || '尚未触发：在输入框内回车提交即可看到' }}
+        </p>
       </div>
     </div>
   </section>
@@ -149,6 +177,25 @@
       margin: 0 0 12px;
       font-size: 14px;
       font-weight: 500;
+
+      &--spaced {
+        margin-top: 20px;
+      }
+    }
+
+    &__hint {
+      margin-left: 6px;
+      font-family: var(--el-font-family-mono, monospace);
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--el-text-color-secondary);
+    }
+
+    &__event {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--el-text-color-regular);
     }
 
     &__code {
