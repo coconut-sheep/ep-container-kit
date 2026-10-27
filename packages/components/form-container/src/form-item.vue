@@ -22,6 +22,7 @@
   } from '@ep-container-kit/utils';
   import {
     COMPONENT_DEFAULT_PROPS,
+    COMPONENT_DEFAULT_PROPS_SOURCE,
     COMPONENT_NAME,
     type FormContainerItem,
     type FormItemProps,
@@ -38,9 +39,10 @@
     required: false,
   });
 
-  const props = withDefaults(defineProps<FormContainerItem>(), {
-    visible: true,
-  });
+  const props = withDefaults(
+    defineProps<FormContainerItem>(),
+    COMPONENT_DEFAULT_PROPS_SOURCE,
+  );
   const slots = useSlots();
   const attrs = useAttrs();
 

@@ -1,5 +1,6 @@
 import { type Ref } from 'vue';
 import type {
+  AnyFunction,
   AnyRecord,
   AnyValue,
   PickFunction,
@@ -66,9 +67,9 @@ export const getRefExposeManuel = <T extends AnyRecord>(
  * 构建 props 的默认值
  * @param props 组件的 props 定义对象
  */
-export const buildPropsDefaultValues = <T extends AnyRecord>(
-  props: AnyRecord,
-): T => {
+export const buildPropsDefaultValues = <T extends AnyRecord>(props: {
+  [K in keyof T]: T[K] | AnyFunction;
+}): T => {
   let result: T = {} as T;
   for (const [key, value] of Object.entries(props)) {
     if (!isFunction(value)) {

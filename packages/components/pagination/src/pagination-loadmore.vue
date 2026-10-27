@@ -3,7 +3,7 @@
   import {
     COMPONENT_DEFAULT_PROPS,
     COMPONENT_NAME,
-    type PaginationLoadMoreEmits,
+    type PaginationLoadMoreEmitsTuple,
     type PaginationLoadMoreProps,
   } from './pagination-loadmore';
   import { computed } from 'vue';
@@ -17,7 +17,7 @@
     COMPONENT_DEFAULT_PROPS,
   );
 
-  const emits = defineEmits<PaginationLoadMoreEmits>();
+  const emits = defineEmits<PaginationLoadMoreEmitsTuple>();
 
   const loadMoreAble = computed(() => {
     const { loaded = 0, total } = props;

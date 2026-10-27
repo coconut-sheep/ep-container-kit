@@ -1,7 +1,6 @@
 <script setup lang="ts">
   import {
     COMPONENT_NAME,
-    getComponentDefaultProps,
     getDefaultPaginationConfig,
     handleJumperPage,
     handleLayout,
@@ -10,6 +9,8 @@
     type PaginationConfig,
     type PaginationEmits,
     type PaginationProps,
+    COMPONENT_DEFAULT_PROPS,
+    COMPONENT_DEFAULT_PROPS_SOURCE,
   } from './pagination';
   import PaginationLoadMore from './pagination-loadmore.vue';
   import { computed, nextTick, ref, useAttrs, watch } from 'vue';
@@ -33,21 +34,18 @@
     },
   });
 
-  const props = withDefaults(defineProps<PaginationProps>(), {
-    background: true,
-    compact: false,
-    stream: false,
-    loaded: 0,
-    loading: false,
-  });
+  const props = withDefaults(
+    defineProps<PaginationProps>(),
+    COMPONENT_DEFAULT_PROPS_SOURCE,
+  );
 
   const emits = defineEmits<PaginationEmits>();
 
   const attrs = useAttrs();
 
-  const defaultProps = getComponentDefaultProps();
+  const defaultProps = COMPONENT_DEFAULT_PROPS;
 
-  const mergedProps = computed(() => {
+  const mergedProps = computed<PaginationProps>(() => {
     const definedProps = filterNullishProps(props);
     return {
       ...defaultProps,

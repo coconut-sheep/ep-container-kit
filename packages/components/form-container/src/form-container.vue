@@ -21,14 +21,13 @@
   import {
     COMPONENT_DEFAULT_PROPS,
     COMPONENT_NAME,
-    type FormContainerEmits,
+    type FormContainerEmitsTuple,
     type FormContainerProps,
   } from './form-container';
   import FormItemSchema from './form-item-schema.vue';
 
   defineOptions({
     name: COMPONENT_NAME,
-    // 关闭自动继承：根节点上 `:model` 的写入顺序需要可控，见模板中的 v-bind 顺序
     inheritAttrs: false,
   });
 
@@ -40,7 +39,7 @@
   });
 
   const props = defineProps<FormContainerProps<T>>();
-  const emits = defineEmits<FormContainerEmits>();
+  const emits = defineEmits<FormContainerEmitsTuple>();
   const attrs = useAttrs();
 
   /**
@@ -58,7 +57,7 @@
     buildProviderInject<FormContainerProvideConfig>(FORM_PROVIDER);
 
   const defaultProps = COMPONENT_DEFAULT_PROPS;
-  const mergedProps = computed(() => {
+  const mergedProps = computed<FormContainerProps>(() => {
     const definedProps = filterNullishProps(props);
 
     return {

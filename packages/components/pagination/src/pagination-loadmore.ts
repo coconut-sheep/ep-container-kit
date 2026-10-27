@@ -1,10 +1,24 @@
 import { getComponentName } from '@ep-container-kit/constants';
+import type {
+  BaseDefaultPropsSource,
+  TuplesToEmits,
+} from '@ep-container-kit/types';
+import { buildPropsDefaultValues } from '@ep-container-kit/utils';
 
-/**
- * PaginationLoadMore 的组件名
- * @description 内部组件，仅在 Pagination 的模板中使用，不对外导出
- */
 export const COMPONENT_NAME = getComponentName('PaginationLoadMore');
+
+export const COMPONENT_DEFAULT_PROPS_SOURCE: BaseDefaultPropsSource<PaginationLoadMoreProps> =
+  {
+    loaded: 0,
+    total: 0,
+    loading: false,
+    disabled: false,
+  };
+
+export const COMPONENT_DEFAULT_PROPS =
+  buildPropsDefaultValues<PaginationLoadMoreProps>(
+    COMPONENT_DEFAULT_PROPS_SOURCE,
+  );
 
 /**
  * PaginationLoadMore 的 Props 类型
@@ -40,7 +54,7 @@ export type PaginationLoadMoreProps = {
  * PaginationLoadMore 的 Emits 类型
  * @description 使用元组形式而非映射类型，避免 @vue/compiler-sfc 解析 `defineEmits<T>()` 时递归
  */
-export type PaginationLoadMoreEmits = {
+export type PaginationLoadMoreEmitsTuple = {
   /**
    * 点击「加载更多」时触发
    * @description 已禁用或已无更多数据时不会触发
@@ -49,12 +63,7 @@ export type PaginationLoadMoreEmits = {
 };
 
 /**
- * PaginationLoadMore 的 Props 默认值
+ * PaginationLoadMore 的 Emits 类型
  */
-export const COMPONENT_DEFAULT_PROPS = {
-  loaded: 0,
-  total: 0,
-  loading: false,
-  disabled: false,
-  able: true,
-};
+export type PaginationLoadMoreEmits =
+  TuplesToEmits<PaginationLoadMoreEmitsTuple>;

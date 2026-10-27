@@ -8,6 +8,10 @@ export const CkPageContainer = withInstall(PageContainerVue);
 /** 页面内容组件，提供标题栏 / 返回按钮 / 内容区布局 */
 export const CkPageContent = withInstall(PageContentVue);
 
-export type { PageContentEmits, PageContentProps } from './src/page-content';
+export type {
+  PageContentProps,
+  PageContentEmits,
+  PageContentEmitsTuple,
+} from './src/page-content';
 
 export default CkPageContainer;

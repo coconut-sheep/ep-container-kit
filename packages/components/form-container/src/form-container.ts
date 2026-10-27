@@ -6,7 +6,8 @@ import {
 } from 'element-plus';
 import type {
   AnyRecord,
-  FormContainerProvideConfig,
+  BaseDefaultPropsSource,
+  TuplesToEmits,
 } from '@ep-container-kit/types';
 import type { FormItemSchemaProps } from './form-item-schema';
 import { getComponentName } from '@ep-container-kit/constants';
@@ -15,10 +16,16 @@ import {
   getPropsDefaultValue,
 } from '@ep-container-kit/utils';
 
-/**
- * 表单容器的组件名
- */
 export const COMPONENT_NAME = getComponentName('FormContainer');
+
+export const COMPONENT_DEFAULT_PROPS_SOURCE: BaseDefaultPropsSource<FormContainerProps> =
+  {
+    ...getPropsDefaultValue(ElForm.props),
+    itemMinWidth: 0,
+  };
+
+export const COMPONENT_DEFAULT_PROPS =
+  buildPropsDefaultValues<FormContainerProps>(COMPONENT_DEFAULT_PROPS_SOURCE);
 
 /**
  * 表单容器的 props
@@ -27,34 +34,32 @@ export const COMPONENT_NAME = getComponentName('FormContainer');
  * ElForm 的 `model` 参与校验。保留该 props 会让调用方误以为 `:model` 是数据入口，
  * 实际却会被内部绑定覆盖，表现为「传了数据但校验始终不通过」。
  */
-export type FormContainerProps<T extends AnyRecord = AnyRecord> = Omit<
-  Partial<FormProps>,
-  'model'
-> &
-  FormContainerProvideConfig & {
-    /**
-     * 表单的 Schema 配置
-     * @description 类型从 FormItemSchema 的 props 中提取，保证两者一致
-     */
-    schema?: FormItemSchemaProps<T>['schema'];
-  };
+export type FormContainerProps<T extends AnyRecord = AnyRecord> = {
+  /**
+   * 元素是否垂直布局，仅影响直接子元素的排列方式
+   * @default false
+   */
+  vertical?: boolean;
+  /**
+   * 表单项最小宽度
+   * @default 0
+   */
+  itemMinWidth?: string | number;
+  /**
+   * 表单项最大宽度
+   */
+  itemMaxWidth?: string | number;
+  /**
+   * 表单的 Schema 配置
+   * @description 类型从 FormItemSchema 的 props 中提取，保证两者一致
+   */
+  schema?: FormItemSchemaProps<T>['schema'];
+} & Partial<Omit<FormProps, 'model'>>;
 
 /**
- * 表单容器的 props 默认值
+ * 表单容器的事件元组
  */
-export const COMPONENT_DEFAULT_PROPS =
-  buildPropsDefaultValues<FormContainerProps>({
-    ...getPropsDefaultValue(ElForm.props),
-    vertical: false,
-  });
-
-/**
- * 表单容器的事件
- * @description 使用「事件名 → 参数元组」的写法，可直接作为 `defineEmits` 的类型参数。
- * 不能用「函数签名 + 映射类型转换」的写法：`EmitsToTuples` 是映射类型，
- * @vue/compiler-sfc 在构建期无法解析，会直接抛错。
- */
-export type FormContainerEmits = {
+export type FormContainerEmitsTuple = {
   /**
    * 表单提交事件
    */
@@ -64,6 +69,11 @@ export type FormContainerEmits = {
    */
   validate: [prop: FormItemProp, isValid: boolean, message: string];
 };
+
+/**
+ * 表单容器的事件
+ */
+export type FormContainerEmits = TuplesToEmits<FormContainerEmitsTuple>;
 
 /**
  * 表单容器实例

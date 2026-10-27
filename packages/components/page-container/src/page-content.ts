@@ -1,15 +1,23 @@
 import { getComponentName } from '@ep-container-kit/constants';
 import { buildPropsDefaultValues } from '@ep-container-kit/utils';
+import type { TuplesToEmits } from '@ep-container-kit/types';
 
-/**
- * PageContent 的组件名
- */
 export const COMPONENT_NAME = getComponentName('PageContent');
+
+export const COMPONENT_DEFAULT_PROPS =
+  buildPropsDefaultValues<PageContentProps>({
+    showBack: false,
+    title: '',
+    bodyClass: '',
+    fullHeight: true,
+    width: '',
+    height: '',
+  });
 
 /**
  * PageContent 的 Props 类型
  */
-export type PageContentProps = {
+export interface PageContentProps {
   /**
    * 是否显示返回按钮
    * @default false
@@ -17,13 +25,11 @@ export type PageContentProps = {
   showBack?: boolean;
   /**
    * 标题文案
-   * @description 与 `header` 插槽同时存在时，标题在左、插槽内容在右
    * @default ''
    */
   title?: string;
   /**
    * 内容区的额外 class
-   * @description 用于叠加工具类（如 `flex-column`）或局部样式覆盖
    * @default ''
    */
   bodyClass?: string;
@@ -45,25 +51,16 @@ export type PageContentProps = {
    * @default ''
    */
   height?: string | number;
-};
+}
 
 /**
  * PageContent 的 Emits 类型
- * @description 使用元组形式而非映射类型，避免 @vue/compiler-sfc 解析 `defineEmits<T>()` 时递归
  */
-export type PageContentEmits = {
+export type PageContentEmitsTuple = {
   backClick: [];
 };
 
 /**
- * PageContent 的 Props 默认值
+ * PageContent 的 Emits 类型
  */
-export const COMPONENT_DEFAULT_PROPS =
-  buildPropsDefaultValues<PageContentProps>({
-    showBack: false,
-    title: '',
-    bodyClass: '',
-    fullHeight: true,
-    width: '',
-    height: '',
-  });
+export type PageContentEmits = TuplesToEmits<PageContentEmitsTuple>;

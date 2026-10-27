@@ -1,12 +1,22 @@
 import type { FormContainerItem } from './form-item';
-import type { AnyRecord } from '@ep-container-kit/types';
+import type {
+  AnyRecord,
+  BaseDefaultPropsSource,
+} from '@ep-container-kit/types';
 import { getComponentName } from '@ep-container-kit/constants';
 import { buildPropsDefaultValues } from '@ep-container-kit/utils';
 
-/**
- * FormItemSchema的组件名
- */
 export const COMPONENT_NAME = getComponentName('FormItemSchema');
+
+export const COMPONENT_DEFAULT_PROPS_SOURCE: BaseDefaultPropsSource<FormItemSchemaProps> =
+  {
+    schema: (): FormContainerItem[] => {
+      return [];
+    },
+  };
+
+export const COMPONENT_DEFAULT_PROPS =
+  buildPropsDefaultValues<FormItemSchemaProps>(COMPONENT_DEFAULT_PROPS_SOURCE);
 
 /**
  * FormItemSchema的Props类型
@@ -20,13 +30,3 @@ export type FormItemSchemaProps<T extends AnyRecord = AnyRecord> = {
    */
   schema: FormContainerItem<T>[];
 };
-
-/**
- * FormItemSchema的props默认值
- */
-export const COMPONENT_DEFAULT_PROPS =
-  buildPropsDefaultValues<FormItemSchemaProps>({
-    schema: (): FormContainerItem[] => {
-      return [];
-    },
-  });

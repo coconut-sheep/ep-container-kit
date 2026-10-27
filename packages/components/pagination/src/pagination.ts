@@ -4,36 +4,17 @@ import {
   ElPagination,
 } from 'element-plus';
 import {
+  buildPropsDefaultValues,
   getPropsDefaultValue,
   isNumber,
   omitEntryProps,
 } from '@ep-container-kit/utils';
+import type { BaseDefaultPropsSource } from '@ep-container-kit/types';
 
 /**
  * Pagination 的组件名
  */
 export const COMPONENT_NAME = getComponentName('Pagination');
-
-/**
- * 无效 Props 的 key 并集：被直接移除的 Props 与被整合的 Props
- * @description 刻意写成字面量联合，而不是从 `INVALID_PROPS` 反推（如 `(typeof INVALID_PROPS)[number]`）：
- * `@vue/compiler-sfc` 解析 `defineProps<T>()` 时，无法把「`as const` + 数组展开」解析成有限 key，
- * 会抛 `Failed to resolve index type into finite keys`，组件在 vite 编译期直接失败
- * @description 保持一致的方式是反向的：`INVALID_PROPS` 声明为 `satisfies readonly InvalidPropKey[]`，
- * 而本类型用 `AssertInvalidPropKey` 保证每一项都是 `ElPaginationProps` 的真实 key
- */
-export type InvalidPropKey =
-  | 'defaultCurrentPage'
-  | 'defaultPageSize'
-  | 'hideOnSinglePage'
-  | 'small'
-  | 'size'
-  | 'pageCount'
-  | 'currentPage'
-  | 'pageSize'
-  | 'pageSizes'
-  | 'total'
-  | 'layout';
 
 /**
  * ElPagination 中在本组件无效的 Props
@@ -56,6 +37,45 @@ export const INVALID_PROPS = [
   'total',
   'layout',
 ] as const satisfies readonly InvalidPropKey[];
+
+export const COMPONENT_DEFAULT_PROPS_SOURCE: BaseDefaultPropsSource<PaginationProps> =
+  {
+    ...omitEntryProps(getPropsDefaultValue(ElPagination.props), [
+      ...INVALID_PROPS,
+      'prevIcon',
+      'nextIcon',
+    ]),
+    background: true,
+    compact: false,
+    stream: false,
+    loaded: 0,
+    loading: false,
+  };
+
+export const COMPONENT_DEFAULT_PROPS = buildPropsDefaultValues<PaginationProps>(
+  COMPONENT_DEFAULT_PROPS_SOURCE,
+);
+
+/**
+ * 无效 Props 的 key 并集：被直接移除的 Props 与被整合的 Props
+ * @description 刻意写成字面量联合，而不是从 `INVALID_PROPS` 反推（如 `(typeof INVALID_PROPS)[number]`）：
+ * `@vue/compiler-sfc` 解析 `defineProps<T>()` 时，无法把「`as const` + 数组展开」解析成有限 key，
+ * 会抛 `Failed to resolve index type into finite keys`，组件在 vite 编译期直接失败
+ * @description 保持一致的方式是反向的：`INVALID_PROPS` 声明为 `satisfies readonly InvalidPropKey[]`，
+ * 而本类型用 `AssertInvalidPropKey` 保证每一项都是 `ElPaginationProps` 的真实 key
+ */
+export type InvalidPropKey =
+  | 'defaultCurrentPage'
+  | 'defaultPageSize'
+  | 'hideOnSinglePage'
+  | 'small'
+  | 'size'
+  | 'pageCount'
+  | 'currentPage'
+  | 'pageSize'
+  | 'pageSizes'
+  | 'total'
+  | 'layout';
 
 /**
  * Pagination 的 Props 类型
@@ -161,27 +181,6 @@ export type PaginationEmits = {
    * 且未处于加载中（`loading` 为 `false`）、未被禁用时可能触发
    */
   loadMore: [];
-};
-
-/**
- * 获取 Pagination 的 Props 默认值
- * @description 每次调用返回新对象，避免多个实例共享同一份引用
- * @description 无效 Props 由 `INVALID_PROPS` 剔除，避免 v-model 之外再出现第二个入口
- * @returns 与 `PaginationProps` 对应的默认值对象
- */
-export const getComponentDefaultProps = (): PaginationProps => {
-  return {
-    ...omitEntryProps(getPropsDefaultValue(ElPagination.props), [
-      ...INVALID_PROPS,
-      'prevIcon',
-      'nextIcon',
-    ]),
-    background: true,
-    compact: false,
-    stream: false,
-    loaded: 0,
-    loading: false,
-  };
 };
 
 /**

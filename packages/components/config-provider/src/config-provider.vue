@@ -6,13 +6,20 @@
     FORM_PROVIDER,
   } from '@ep-container-kit/constants';
   import { handleProvideValue, omitEntryProps } from '@ep-container-kit/utils';
-  import { COMPONENT_NAME, type ConfigProviderProps } from './config-provider';
+  import {
+    COMPONENT_NAME,
+    COMPONENT_DEFAULT_PROPS_SOURCE,
+    type ConfigProviderProps,
+  } from './config-provider';
 
   defineOptions({
     name: COMPONENT_NAME,
   });
 
-  const props = defineProps<ConfigProviderProps>();
+  const props = withDefaults(
+    defineProps<ConfigProviderProps>(),
+    COMPONENT_DEFAULT_PROPS_SOURCE,
+  );
 
   /**
    * 提供 FormContainer 组件的 provide 属性

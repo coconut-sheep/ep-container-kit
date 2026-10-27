@@ -47,6 +47,21 @@ export type EmitsToTuples<T> = {
 };
 
 /**
+ * 用于将对象中参数元组形式的属性值（如`defineEmits`的元组写法）转换为函数签名形式
+ * @description `EmitsToTuples` 的逆操作，常用于将"元组参数事件类型"转换为对外暴露的
+ * "函数签名事件类型"（如组件实例方法、`v-on` 监听器、prop 回调等场景）
+ * @template T 需要转换的对象类型，其属性值为参数元组
+ * @example
+ * ```ts
+ * type Emits = { submit: []; validate: [prop: string, isValid: boolean] };
+ * type type1 = TuplesToEmits<Emits>; // { submit: () => void; validate: (prop: string, isValid: boolean) => void }
+ * ```
+ */
+export type TuplesToEmits<T> = {
+  [K in keyof T]: T[K] extends AnyArray ? (...args: T[K]) => void : never;
+};
+
+/**
  * 用于从一个对象中提取其所有属性值，将其转为联合属性
  * @example
  * ```ts

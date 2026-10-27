@@ -13,9 +13,10 @@ export const CkFormItem = withInstall(FormItemVue);
 export const CkFormItemSchema = withInstall(FormItemSchemaVue);
 
 export {
-  type FormContainerEmits,
-  type FormContainerInstance,
   type FormContainerProps,
+  type FormContainerEmits,
+  type FormContainerEmitsTuple,
+  type FormContainerInstance,
 } from './src/form-container';
 
 export {

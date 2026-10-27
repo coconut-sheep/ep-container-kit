@@ -3,6 +3,7 @@ import type {
   AnyValue,
   Arrayable,
   BaseComponent,
+  BaseDefaultPropsSource,
   BaseEvents,
   BaseProps,
   BaseSlots,
@@ -65,40 +66,42 @@ import type { EmitFn, Ref, VNode } from 'vue';
 import { getComponentName } from '@ep-container-kit/constants';
 import { buildPropsDefaultValues } from '@ep-container-kit/utils';
 
-/**
- * 表单项的组件名
- */
 export const COMPONENT_NAME = getComponentName('FormItem');
 
-export const COMPONENT_DEFAULT_PROPS = buildPropsDefaultValues<FormItemProps>({
-  prop: undefined,
-  label: undefined,
-  rules: () => {
-    return [];
-  },
-  col: undefined,
-  visible: true,
-  hidden: false,
-  type: undefined,
-  itemProps: () => {
-    return {};
-  },
-  itemSlots: () => {
-    return {};
-  },
-  itemRender: undefined,
-  props: () => {
-    return {};
-  },
-  slots: () => {
-    return {};
-  },
-  events: () => {
-    return {};
-  },
-  component: undefined,
-  render: undefined,
-});
+export const COMPONENT_DEFAULT_PROPS_SOURCE: BaseDefaultPropsSource<FormItemProps> =
+  {
+    prop: undefined,
+    label: undefined,
+    rules: () => {
+      return [];
+    },
+    col: undefined,
+    visible: true,
+    hidden: false,
+    type: undefined,
+    itemProps: () => {
+      return {};
+    },
+    itemSlots: () => {
+      return {};
+    },
+    itemRender: undefined,
+    props: () => {
+      return {};
+    },
+    slots: () => {
+      return {};
+    },
+    events: () => {
+      return {};
+    },
+    component: undefined,
+    render: undefined,
+  };
+
+export const COMPONENT_DEFAULT_PROPS = buildPropsDefaultValues<FormItemProps>(
+  COMPONENT_DEFAULT_PROPS_SOURCE,
+);
 
 /**
  * 组件的插槽类型

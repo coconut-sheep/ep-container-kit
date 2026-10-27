@@ -1,11 +1,22 @@
 import { type ConfigProviderProps as ElConfigProviderProps } from 'element-plus';
 import { getComponentName } from '@ep-container-kit/constants';
-import type { FormContainerProvideConfig } from '@ep-container-kit/types';
+import type {
+  BaseDefaultPropsSource,
+  FormContainerProvideConfig,
+} from '@ep-container-kit/types';
+import { buildPropsDefaultValues } from '@ep-container-kit/utils';
 
-/**
- * 配置提供器组件的组件名
- */
 export const COMPONENT_NAME = getComponentName('ConfigProvider');
+
+export const COMPONENT_DEFAULT_PROPS_SOURCE: BaseDefaultPropsSource<ConfigProviderProps> =
+  {
+    form: () => {
+      return {} as FormContainerProvideConfig;
+    },
+  };
+
+export const COMPONENT_DEFAULT_PROPS =
+  buildPropsDefaultValues<ConfigProviderProps>(COMPONENT_DEFAULT_PROPS_SOURCE);
 
 /**
  * 配置提供器组件的 props
@@ -19,8 +30,6 @@ export interface ConfigProviderProps extends Partial<ElConfigProviderProps> {
   form?: FormContainerProvideConfig;
 }
 
-// 类型本体统一维护在 @ep-container-kit/types，此处再导出，
-// 使消费方既可从组件入口取，也能从类型包取，两条路径指向同一份定义。
 export type {
   ConfigProviderProvide,
   FormContainerProvideConfig,

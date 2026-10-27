@@ -23,8 +23,7 @@
     width: 100%;
     height: 100%;
     overflow: auto;
-    // 纯色页面底色：不使用半透明叠层与 backdrop-filter，
-    // 避免组件库侵入宿主的玻璃拟态主题，宿主可用 --el-bg-color-page 覆盖
-    background: var(--el-bg-color-page, transparent);
+    background: transparent;
+    padding: 12px;
   }
 </style>

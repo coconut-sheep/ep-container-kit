@@ -6,7 +6,7 @@
   import {
     COMPONENT_DEFAULT_PROPS,
     COMPONENT_NAME,
-    type PageContentEmits,
+    type PageContentEmitsTuple,
     type PageContentProps,
   } from './page-content';
 
@@ -19,7 +19,7 @@
     COMPONENT_DEFAULT_PROPS,
   );
 
-  const emits = defineEmits<PageContentEmits>();
+  const emits = defineEmits<PageContentEmitsTuple>();
 
   /**
    * 内容区尺寸
@@ -53,11 +53,7 @@
 
 <template>
   <div class="page-content" :style="contentStyle">
-    <!--
-      头部渲染条件：header 插槽 / title / showBack 任一存在即可。
-      直接读 $slots 而非用 computed 包裹，保证父级动态增删插槽时每次渲染都重新求值。
-    -->
-    <div v-if="$slots.header || title || showBack" class="page-content-header">
+    <div v-if="$slots.header || title || showBack" class="page-content--header">
       <div v-if="title || showBack" class="header-title">
         <span
           v-if="showBack"
@@ -68,21 +64,17 @@
           @click="handleBackClick"
           @keydown.enter="handleBackClick"
         >
-          <!--
-            图标默认走 Element Plus 官方图标，与 ElButton 等组件的观感统一；
-            `back-icon` 插槽可整体接管，用于替换为自定义 SVG 或其他图标集
-          -->
           <slot name="back-icon">
-            <ElIcon aria-hidden="true">
+            <el-icon size="22px">
               <ArrowLeft />
-            </ElIcon>
+            </el-icon>
           </slot>
         </span>
-        <span class="header-title-text">{{ title }}</span>
+        <span class="header-title-text">{{ props.title }}</span>
       </div>
       <slot name="header" />
     </div>
-    <div v-if="$slots.default" class="page-content-body" :class="bodyClass">
+    <div v-if="$slots.default" class="page-content--body" :class="bodyClass">
       <slot />
     </div>
   </div>
@@ -97,27 +89,26 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    padding: 18px;
-    row-gap: 14px;
+    padding: 12px;
+    row-gap: 12px;
+    border-radius: 12px;
+    background: var(--el-bg-color, #ffffff);
+    box-shadow: var(--el-box-shadow);
 
-    .page-content-header {
-      position: relative;
+    .page-content--header {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
+      position: relative;
       min-width: 0;
-      min-height: 52px;
-      padding: 8px 10px;
+      min-height: 0;
       column-gap: 12px;
-      border: 1px solid var(--el-border-color-lighter, #ebeef5);
       border-radius: 8px;
-      // 纯色底 + 细边框：用实色表面表达层级，不叠加模糊与半透明蒙层
-      background: var(--el-bg-color, #ffffff);
 
       .header-title {
         display: flex;
         align-items: center;
-        column-gap: 6px;
+        column-gap: 4px;
         max-width: 40%;
         min-width: 0;
         font-size: 18px;
@@ -125,13 +116,11 @@
         color: var(--el-text-color-primary, #303133);
 
         .header-back {
-          display: inline-flex;
-          flex-shrink: 0;
+          display: flex;
           align-items: center;
           justify-content: center;
-          color: inherit;
+          width: fit-content;
           cursor: pointer;
-          border-radius: 4px;
 
           &:hover {
             color: var(--el-color-primary, #409eff);
@@ -152,7 +141,7 @@
       }
     }
 
-    .page-content-body {
+    .page-content--body {
       display: flex;
       flex: 1;
       min-height: 0;
