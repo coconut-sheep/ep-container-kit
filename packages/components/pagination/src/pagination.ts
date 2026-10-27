@@ -9,7 +9,10 @@ import {
   isNumber,
   omitEntryProps,
 } from '@ep-container-kit/utils';
-import type { BaseDefaultPropsSource } from '@ep-container-kit/types';
+import type {
+  BaseDefaultPropsSource,
+  TuplesToEmits,
+} from '@ep-container-kit/types';
 
 /**
  * Pagination 的组件名
@@ -18,11 +21,9 @@ export const COMPONENT_NAME = getComponentName('Pagination');
 
 /**
  * ElPagination 中在本组件无效的 Props
- * @description 分两类：前 6 个是被**直接移除**的（避免误写），后 5 个是被**整合进 modelValue** 的，
- * 后者只能通过 v-model 传入，写成 prop 不会再生效（如 EP 默认的 `layout` 字符串会盖掉配置里的数组）
- * @description 运行时用它剔除 EP 的默认值与透传的 attrs，类型层由 `InvalidPropKey` 剔除，两者需同步维护
+ * @see InvalidPropKey
  */
-export const INVALID_PROPS = [
+export const INVALID_PROPS: InvalidPropKey[] = [
   // 直接移除
   'defaultCurrentPage',
   'defaultPageSize',
@@ -36,9 +37,16 @@ export const INVALID_PROPS = [
   'pageSizes',
   'total',
   'layout',
-] as const satisfies readonly InvalidPropKey[];
+];
 
-export const COMPONENT_DEFAULT_PROPS_SOURCE: BaseDefaultPropsSource<PaginationProps> =
+export const COMPONENT_DEFAULT_PROPS_HOLDER: BaseDefaultPropsSource<PaginationProps> =
+  {
+    compact: undefined,
+    stream: undefined,
+    loading: undefined,
+  };
+
+export const COMPONENT_DEFAULT_PROPS = buildPropsDefaultValues<PaginationProps>(
   {
     ...omitEntryProps(getPropsDefaultValue(ElPagination.props), [
       ...INVALID_PROPS,
@@ -50,19 +58,16 @@ export const COMPONENT_DEFAULT_PROPS_SOURCE: BaseDefaultPropsSource<PaginationPr
     stream: false,
     loaded: 0,
     loading: false,
-  };
-
-export const COMPONENT_DEFAULT_PROPS = buildPropsDefaultValues<PaginationProps>(
-  COMPONENT_DEFAULT_PROPS_SOURCE,
+  },
 );
 
 /**
- * 无效 Props 的 key 并集：被直接移除的 Props 与被整合的 Props
- * @description 刻意写成字面量联合，而不是从 `INVALID_PROPS` 反推（如 `(typeof INVALID_PROPS)[number]`）：
- * `@vue/compiler-sfc` 解析 `defineProps<T>()` 时，无法把「`as const` + 数组展开」解析成有限 key，
- * 会抛 `Failed to resolve index type into finite keys`，组件在 vite 编译期直接失败
- * @description 保持一致的方式是反向的：`INVALID_PROPS` 声明为 `satisfies readonly InvalidPropKey[]`，
- * 而本类型用 `AssertInvalidPropKey` 保证每一项都是 `ElPaginationProps` 的真实 key
+ * ElPagination中当前组件不再适用的属性，已被使用替代方案实现或被整合
+ * - `defaultCurrentPage`、`defaultPageSize`、`hideOnSinglePage`、`size`、`pageCount` 不再适用，已使用替代方案实现
+ * - `small` 官方已经不推荐使用
+ * - `currentPage`、`pageSize`、`pageSizes`、`total`、`layout` 已被整合到 PaginationConfig类型中
+ * - 其中 `layout` 由字符串转为字符串数组
+ * @see PaginationConfig
  */
 export type InvalidPropKey =
   | 'defaultCurrentPage'
@@ -79,44 +84,33 @@ export type InvalidPropKey =
 
 /**
  * Pagination 的 Props 类型
- * @description 其中 `currentPage`、`pageSize`、`pageSizes`、`total`、`layout` 被整合到 modelValue的类型`PaginationConfig`中
+ * @description 其中 `currentPage`、`pageSize`、`pageSizes`、`total`、`layout` 被整合到modelValue的类型`PaginationConfig`中
  * @description 其中 `defaultCurrentPage`、`defaultPageSize`、`hideOnSinglePage`、`small`、`size`、`pageCount` 属性被移除
+ * @see PaginationConfig
+ * @see InvalidPropKey
  */
 export type PaginationProps = {
   /**
    * 是否启用紧凑形态
-   * @description 只决定「由哪套单元渲染」，不改变参数含义与取值
-   * @description 为 `true` 时，`pager` 仅显示当前页码，不显示其他页码按钮
    * @default false
+   * @see PaginationLayout
    */
   compact?: boolean;
   /**
    * 是否为流式加载
-   * @description 类似滚动到底部触发加载更多，适用于分段累计加载的场景
-   * @description 为 `true` 时 `pager`、`prev`、`next`、`jumper`、`total` 一律从布局中剔除，
-   * 由 `loadMore` **一个**片段固定渲染「加载更多按钮 + 已加载 / 总数量」：
-   * 按钮与计数绑在同一片段内，顺序固定，不会因布局顺序不同而被拆散
-   * @description 与 `compact` 相互独立，两种形态下表现一致：紧凑形态由本组件逐片段渲染；
-   * 非紧凑形态把该片段挂到 Element Plus 的 `slot` 位置渲染，其余片段（如 `sizes`、`->`）仍交给 Element Plus
    * @default false
+   * @see PaginationLayout
    */
   stream?: boolean;
   /**
    * 已加载条数
-   * @description 仅在 `stream` 为 `true` 时被读取：判断是否还有更多（`loaded < total`），
-   * 并作为 `loadMore` 片段中「已加载 / 总数量」的已加载一方
-   * @description 未开启 `stream` 时该属性不产生任何效果
+   * @description 作为 `loadMore` 片段中「已加载 / 总数量」的已加载一方
+   * @see PaginationLayout
    * @default 0
    */
   loaded?: number;
   /**
    * 加载中状态
-   * @description 为 `true` 时禁用所有可操作单元：`prev`、`next`、`sizes`、`jumper`、`loadMore`，
-   * 其中「加载更多」按钮还会呈现 loading
-   * @description 生效范围取决于形态：`compact` 为 `true` 时由本组件逐个禁用；
-   * 非紧凑形态下借 Element Plus 的 `disabled` 整体禁用，但**仅在 `stream` 为 `true` 时**，
-   * 普通分页不受该属性影响
-   * @default false
    */
   loading?: boolean;
 } & Partial<Omit<ElPaginationProps, InvalidPropKey>>;
@@ -124,15 +118,17 @@ export type PaginationProps = {
 /**
  * 分页器的布局片段
  * @description 取值与 Element Plus 的 `layout` 基本一致，按数组顺序从左到右渲染，不去重也不排序
- * @description `->` 是占位符，把它前后的片段分推到两侧
- * @description `loadMore` 是本组件新增的片段，一个片段内固定包含「加载更多按钮」与
- * 「已加载 / 总数量」两部分，二者不拆成两个片段，避免相对位置随布局顺序漂移
- * @description 各片段的生效条件：
- * - `loadMore`：`stream` 为 `true`
- * - `pager`、`prev`、`next`、`jumper`、`total`：`stream` 为 `false`（计数已并入 `loadMore`）
- * - `->`：`compact` 为 `false`
- * @description 关于 `slot`：Element Plus 的 `slot` 片段已被本组件内部占用（承载 `loadMore`），
- * 不再对外暴露，因此不在取值范围内
+ * - `slot` 片段不再适用，已被本组件内部占用（承载 `loadMore`），不再对外暴露，因此不在取值范围内
+ * - `loadMore` 是本组件新增的片段，一个片段内固定包含「加载更多按钮」与 「已加载 / 总数量」两部分，二者不拆成两个片段
+ * @description 各片段与props的相性：
+ * @description `compact` 为 `true` 时：
+ * - `pager` 只显示当前页码；
+ * - `sizes` 会转化成类似ElInputNumber的左加右减的样式；
+ * - `->` 不可用或不生效
+ * @description `stream` 为 `true` 时：
+ * - `prev`、`pager`、`next`、`jumper`、`total` 不可用或不生效
+ * @description `stream` 为 `false` 时：
+ * - `loadMore` 不可用或不生效
  */
 export type PaginationLayout =
   'total' | 'sizes' | 'prev' | 'pager' | 'next' | 'jumper' | '->' | 'loadMore';
@@ -142,7 +138,7 @@ export type PaginationLayout =
  */
 export interface PaginationConfig {
   /**
-   * 当前页码，从 1 开始
+   * 当前页码
    */
   currentPage: number;
   /**
@@ -151,8 +147,7 @@ export interface PaginationConfig {
   pageSize: number;
   /**
    * 每页条数的可选项
-   * @description 按数组顺序原样传给 Element Plus 与紧凑形态的步进按钮，
-   * 不会被自动去重或排序，请自行保证每一项唯一且升序
+   * @description 不会被自动去重或排序，请自行保证每一项唯一且升序
    */
   pageSizes: number[];
   /**
@@ -161,15 +156,16 @@ export interface PaginationConfig {
   total: number;
   /**
    * 布局片段
+   * @description 不会被自动去重，重复的标签会重复渲染
+   * @see PaginationLayout
    */
   layout: PaginationLayout[];
 }
 
 /**
  * Pagination 的 Emits 类型
- * @description 使用元组形式而非映射类型，避免 @vue/compiler-sfc 解析 `defineEmits<T>()` 时递归
  */
-export type PaginationEmits = {
+export type PaginationEmitsTuple = {
   /**
    * 页码或每页条数变更后触发
    * @description 在 `nextTick` 中派发，此时 `v-model` 绑定的配置对象已经是最新值
@@ -182,6 +178,11 @@ export type PaginationEmits = {
    */
   loadMore: [];
 };
+
+/**
+ * Pagination 的 Emits 类型
+ */
+export type PaginationEmits = TuplesToEmits<PaginationEmitsTuple>;
 
 /**
  * 获取默认的分页配置
@@ -217,7 +218,7 @@ export const getDefaultPaginationConfig = (
     currentPage: 1,
     pageSize: 10,
     total: 0,
-    pageSizes: [10, 20, 50, 100, 200],
+    pageSizes: [10, 20, 50, 100, 200, 500],
     layout: ['sizes', 'prev', 'pager', 'next', 'jumper', 'loadMore', 'total'],
     ...config,
   };

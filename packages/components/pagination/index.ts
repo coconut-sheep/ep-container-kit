@@ -7,15 +7,16 @@ export { getDefaultPaginationConfig } from './src/pagination';
 
 export type {
   PaginationProps,
-  PaginationConfig,
   PaginationEmits,
+  PaginationEmitsTuple,
   PaginationLayout,
+  PaginationConfig,
 } from './src/pagination';
 
 export type {
+  PaginationLoadMoreProps,
   PaginationLoadMoreEmits,
   PaginationLoadMoreEmitsTuple,
-  PaginationLoadMoreProps,
 } from './src/pagination-loadmore';
 
 export default CkPagination;

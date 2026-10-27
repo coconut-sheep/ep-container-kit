@@ -20,7 +20,7 @@
   } from '@ep-container-kit/utils';
   import {
     COMPONENT_DEFAULT_PROPS,
-    COMPONENT_DEFAULT_PROPS_SOURCE,
+    COMPONENT_DEFAULT_PROPS_HOLDER,
     COMPONENT_NAME,
     type FormContainerEmitsTuple,
     type FormContainerProps,
@@ -41,7 +41,7 @@
 
   const props = withDefaults(
     defineProps<FormContainerProps<T>>(),
-    COMPONENT_DEFAULT_PROPS_SOURCE,
+    COMPONENT_DEFAULT_PROPS_HOLDER,
   );
   const emits = defineEmits<FormContainerEmitsTuple>();
   const attrs = useAttrs();
@@ -89,11 +89,6 @@
 
   /**
    * 传递给 el-form 的 props
-   * @description 用「el-form 实际声明的 props」做白名单，而不是剔除已知的内部 key。
-   * 容器的 props 里混着三类 el-form 不认识的东西：`schema`、`vertical` / `itemMinWidth` 等
-   * 容器自有配置，以及 `v-model` 生成的 `modelValue`。只要漏掉一个，它就会作为
-   * fallthrough attribute 落到 `<form>` 上，渲染成 `modelvalue="[object Object]"` 这类脏属性。
-   * 白名单从根上避免了「新增内部配置忘记同步剔除列表」的问题。
    */
   const formContainerProps = computed(() => {
     return pickEntryProps(

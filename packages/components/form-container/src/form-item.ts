@@ -68,40 +68,34 @@ import { buildPropsDefaultValues } from '@ep-container-kit/utils';
 
 export const COMPONENT_NAME = getComponentName('FormItem');
 
-export const COMPONENT_DEFAULT_PROPS_SOURCE: BaseDefaultPropsSource<FormItemProps> =
+export const COMPONENT_DEFAULT_PROPS_HOLDER: BaseDefaultPropsSource<FormItemProps> =
   {
-    prop: undefined,
-    label: undefined,
-    rules: () => {
-      return [];
-    },
-    col: undefined,
-    visible: true,
-    hidden: false,
-    type: undefined,
-    itemProps: () => {
-      return {};
-    },
-    itemSlots: () => {
-      return {};
-    },
-    itemRender: undefined,
-    props: () => {
-      return {};
-    },
-    slots: () => {
-      return {};
-    },
-    events: () => {
-      return {};
-    },
-    component: undefined,
-    render: undefined,
+    visible: undefined,
+    hidden: undefined,
   };
 
-export const COMPONENT_DEFAULT_PROPS = buildPropsDefaultValues<FormItemProps>(
-  COMPONENT_DEFAULT_PROPS_SOURCE,
-);
+export const COMPONENT_DEFAULT_PROPS = buildPropsDefaultValues<FormItemProps>({
+  visible: true,
+  hidden: false,
+  rules: () => {
+    return [] as FormContainerItem['rules'];
+  },
+  itemProps: () => {
+    return {} as FormContainerItem['itemProps'];
+  },
+  itemSlots: () => {
+    return {} as FormContainerItem['itemSlots'];
+  },
+  props: () => {
+    return {} as FormContainerItem['props'];
+  },
+  slots: () => {
+    return {} as FormContainerItem['slots'];
+  },
+  events: () => {
+    return {} as FormContainerItem['events'];
+  },
+});
 
 /**
  * 组件的插槽类型

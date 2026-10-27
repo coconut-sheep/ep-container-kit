@@ -18,22 +18,20 @@ import {
 
 export const COMPONENT_NAME = getComponentName('FormContainer');
 
-export const COMPONENT_DEFAULT_PROPS_SOURCE: BaseDefaultPropsSource<FormContainerProps> =
+export const COMPONENT_DEFAULT_PROPS_HOLDER: BaseDefaultPropsSource<FormContainerProps> =
   {
-    ...getPropsDefaultValue(ElForm.props),
-    itemMinWidth: 0,
-    vertical: false,
+    vertical: undefined,
   };
 
 export const COMPONENT_DEFAULT_PROPS =
-  buildPropsDefaultValues<FormContainerProps>(COMPONENT_DEFAULT_PROPS_SOURCE);
+  buildPropsDefaultValues<FormContainerProps>({
+    ...getPropsDefaultValue(ElForm.props),
+    itemMinWidth: 0,
+    vertical: false,
+  });
 
 /**
  * 表单容器的 props
- * @description 在 ElForm 的 props 基础上，追加垂直布局、Schema 以及可被全局下发的尺寸配置
- * @description 剔除了 ElForm 的 `model`：容器自身的数据源由 `v-model` 提供，并原样作为
- * ElForm 的 `model` 参与校验。保留该 props 会让调用方误以为 `:model` 是数据入口，
- * 实际却会被内部绑定覆盖，表现为「传了数据但校验始终不通过」。
  */
 export type FormContainerProps<T extends AnyRecord = AnyRecord> = {
   /**
@@ -52,7 +50,6 @@ export type FormContainerProps<T extends AnyRecord = AnyRecord> = {
   itemMaxWidth?: string | number;
   /**
    * 表单的 Schema 配置
-   * @description 类型从 FormItemSchema 的 props 中提取，保证两者一致
    */
   schema?: FormItemSchemaProps<T>['schema'];
 } & Partial<Omit<FormProps, 'model'>>;

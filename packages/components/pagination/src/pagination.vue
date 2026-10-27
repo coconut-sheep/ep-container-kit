@@ -7,10 +7,10 @@
     INVALID_PROPS,
     toElPaginationLayout,
     type PaginationConfig,
-    type PaginationEmits,
     type PaginationProps,
     COMPONENT_DEFAULT_PROPS,
-    COMPONENT_DEFAULT_PROPS_SOURCE,
+    COMPONENT_DEFAULT_PROPS_HOLDER,
+    type PaginationEmitsTuple,
   } from './pagination';
   import PaginationLoadMore from './pagination-loadmore.vue';
   import { computed, nextTick, ref, useAttrs, watch } from 'vue';
@@ -36,15 +36,12 @@
 
   const props = withDefaults(
     defineProps<PaginationProps>(),
-    COMPONENT_DEFAULT_PROPS_SOURCE,
+    COMPONENT_DEFAULT_PROPS_HOLDER,
   );
-
-  const emits = defineEmits<PaginationEmits>();
-
+  const emits = defineEmits<PaginationEmitsTuple>();
   const attrs = useAttrs();
 
   const defaultProps = COMPONENT_DEFAULT_PROPS;
-
   const mergedProps = computed<PaginationProps>(() => {
     const definedProps = filterNullishProps(props);
     return {
@@ -54,8 +51,7 @@
   });
 
   const mergedAttrs = computed(() => {
-    // INVALID_PROPS 是 `as const` 的只读元组，展开一份即可满足 K[] 的签名
-    return omitEntryProps(attrs, [...INVALID_PROPS]);
+    return omitEntryProps(attrs, INVALID_PROPS);
   });
 
   const mergedLayout = computed(() => {
@@ -197,18 +193,8 @@
     updatePageSize(pageSizes[index + 1]!);
   };
 
-  const loadMoreAble = computed(() => {
-    const { total } = modelValue.value;
-    const { loaded = 0 } = mergedProps.value;
-
-    return loaded < total;
-  });
-
   // 加载更多
   const handleLoadMore = () => {
-    if (!isOperable.value || !loadMoreAble.value) {
-      return;
-    }
     emits('loadMore');
   };
 

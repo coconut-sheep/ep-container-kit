@@ -2,11 +2,13 @@
   import { BottomRight } from '@element-plus/icons-vue';
   import {
     COMPONENT_DEFAULT_PROPS,
+    COMPONENT_DEFAULT_PROPS_HOLDER,
     COMPONENT_NAME,
     type PaginationLoadMoreEmitsTuple,
     type PaginationLoadMoreProps,
   } from './pagination-loadmore';
   import { computed } from 'vue';
+  import { filterNullishProps } from '@ep-container-kit/utils';
 
   defineOptions({
     name: COMPONENT_NAME,
@@ -14,13 +16,21 @@
 
   const props = withDefaults(
     defineProps<PaginationLoadMoreProps>(),
-    COMPONENT_DEFAULT_PROPS,
+    COMPONENT_DEFAULT_PROPS_HOLDER,
   );
-
   const emits = defineEmits<PaginationLoadMoreEmitsTuple>();
 
+  const defaultProps = COMPONENT_DEFAULT_PROPS;
+  const mergedProps = computed<PaginationLoadMoreProps>(() => {
+    const definedProps = filterNullishProps(props);
+    return {
+      ...defaultProps,
+      ...definedProps,
+    };
+  });
+
   const loadMoreAble = computed(() => {
-    const { loaded = 0, total } = props;
+    const { loaded = 0, total = 0 } = mergedProps.value;
 
     return loaded < total;
   });
@@ -31,7 +41,9 @@
    * `el-button` 的 `disabled` 已拦住点击，这里兜底键盘与程序化触发
    */
   const handleClick = () => {
-    if (props.disabled || !loadMoreAble.value) {
+    const { disabled, loading } = mergedProps.value;
+
+    if (disabled || loading || !loadMoreAble.value) {
       return;
     }
 
@@ -45,8 +57,8 @@
     :class="{ 'is-disabled': disabled || !loadMoreAble }"
   >
     <el-button
-      :disabled="disabled || !loadMoreAble"
-      :loading="loading"
+      :disabled="mergedProps.disabled || !loadMoreAble"
+      :loading="mergedProps.loading"
       :title="loadMoreAble ? '加载更多' : '没有更多了'"
       link
       @click.stop="handleClick"
@@ -56,9 +68,9 @@
       </el-icon>
     </el-button>
     <div class="pagination-loadmore--total" title="已加载 / 总数量">
-      <span>{{ loaded }}</span>
+      <span>{{ mergedProps.loaded }}</span>
       <span aria-hidden="true">/</span>
-      <span>{{ total }}</span>
+      <span>{{ mergedProps.total }}</span>
     </div>
   </div>
 </template>

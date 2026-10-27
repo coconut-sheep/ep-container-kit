@@ -7,18 +7,19 @@ import { buildPropsDefaultValues } from '@ep-container-kit/utils';
 
 export const COMPONENT_NAME = getComponentName('PaginationLoadMore');
 
-export const COMPONENT_DEFAULT_PROPS_SOURCE: BaseDefaultPropsSource<PaginationLoadMoreProps> =
+export const COMPONENT_DEFAULT_PROPS_HOLDER: BaseDefaultPropsSource<PaginationLoadMoreProps> =
   {
+    loading: undefined,
+    disabled: undefined,
+  };
+
+export const COMPONENT_DEFAULT_PROPS =
+  buildPropsDefaultValues<PaginationLoadMoreProps>({
     loaded: 0,
     total: 0,
     loading: false,
     disabled: false,
-  };
-
-export const COMPONENT_DEFAULT_PROPS =
-  buildPropsDefaultValues<PaginationLoadMoreProps>(
-    COMPONENT_DEFAULT_PROPS_SOURCE,
-  );
+  });
 
 /**
  * PaginationLoadMore 的 Props 类型

@@ -22,7 +22,7 @@
   } from '@ep-container-kit/utils';
   import {
     COMPONENT_DEFAULT_PROPS,
-    COMPONENT_DEFAULT_PROPS_SOURCE,
+    COMPONENT_DEFAULT_PROPS_HOLDER,
     COMPONENT_NAME,
     type FormContainerItem,
     type FormItemProps,
@@ -41,7 +41,7 @@
 
   const props = withDefaults(
     defineProps<FormContainerItem>(),
-    COMPONENT_DEFAULT_PROPS_SOURCE,
+    COMPONENT_DEFAULT_PROPS_HOLDER,
   );
   const slots = useSlots();
   const attrs = useAttrs();

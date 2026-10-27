@@ -4,6 +4,7 @@
     COMPONENT_NAME,
     COMPONENT_DEFAULT_PROPS,
     type FormItemSchemaProps,
+    COMPONENT_DEFAULT_PROPS_HOLDER,
   } from './form-item-schema';
   import {
     computed,
@@ -33,15 +34,10 @@
     },
   });
 
-  /**
-   * 运行时 props 声明
-   * @description `FormItemSchemaProps<T>['schema']` 是 `FormContainerItem<T>[]`，
-   * 即 20 个成员的判别联合。若直接写 `defineProps<FormItemSchemaProps<T>>()`，
-   * @vue/compiler-sfc 在构建期解析该联合时会无限递归。
-   * 这里用 `PropType` 只保留编译期类型、运行时仍声明为 Array，
-   * 同时 default 复用 `COMPONENT_DEFAULT_PROPS`，避免两处默认值漂移。
-   */
-  const props = defineProps<FormItemSchemaProps<T>>();
+  const props = withDefaults(
+    defineProps<FormItemSchemaProps<T>>(),
+    COMPONENT_DEFAULT_PROPS_HOLDER,
+  );
   const slots = useSlots();
 
   const defaultProps = COMPONENT_DEFAULT_PROPS;
@@ -69,11 +65,13 @@
       for (const prop of list) {
         // 先判断空 prop
         if (!prop) {
-          console.warn(`FormItemSchema: 存在空prop, 该字段无法编辑`);
+          console.warn(`${COMPONENT_NAME}: 存在空prop, 该字段无法编辑`);
           continue;
         }
         // 再处理不存在的 prop
-        console.warn(`FormItemSchema: 不存在的prop: ${prop}, 该字段无法编辑`);
+        console.warn(
+          `${COMPONENT_NAME}: 不存在的prop: ${prop}, 该字段无法编辑`,
+        );
       }
     },
     { immediate: true },
