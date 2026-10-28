@@ -2,7 +2,11 @@
   import { computed, type CSSProperties, useSlots } from 'vue';
   import { ElIcon } from 'element-plus';
   import { ArrowLeft } from '@element-plus/icons-vue';
-  import { filterNullishProps, toSizeValue } from '@ep-container-kit/utils';
+  import {
+    buildPropsDefaultValues,
+    filterNullishProps,
+    toSizeValue,
+  } from '@ep-container-kit/utils';
   import {
     COMPONENT_DEFAULT_PROPS,
     COMPONENT_DEFAULT_PROPS_HOLDER,
@@ -22,7 +26,9 @@
   const emits = defineEmits<PageContentEmitsTuple>();
   const slots = useSlots();
 
-  const defaultProps = COMPONENT_DEFAULT_PROPS;
+  const defaultProps = buildPropsDefaultValues<PageContentProps>(
+    COMPONENT_DEFAULT_PROPS,
+  );
   const mergedProps = computed<PageContentProps>(() => {
     const definedProps = filterNullishProps(props);
     return {

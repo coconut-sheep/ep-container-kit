@@ -8,7 +8,10 @@
     type PaginationLoadMoreProps,
   } from './pagination-loadmore';
   import { computed } from 'vue';
-  import { filterNullishProps } from '@ep-container-kit/utils';
+  import {
+    buildPropsDefaultValues,
+    filterNullishProps,
+  } from '@ep-container-kit/utils';
 
   defineOptions({
     name: COMPONENT_NAME,
@@ -20,7 +23,9 @@
   );
   const emits = defineEmits<PaginationLoadMoreEmitsTuple>();
 
-  const defaultProps = COMPONENT_DEFAULT_PROPS;
+  const defaultProps = buildPropsDefaultValues<PaginationLoadMoreProps>(
+    COMPONENT_DEFAULT_PROPS,
+  );
   const mergedProps = computed<PaginationLoadMoreProps>(() => {
     const definedProps = filterNullishProps(props);
     return {

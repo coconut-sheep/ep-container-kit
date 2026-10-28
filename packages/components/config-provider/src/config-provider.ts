@@ -1,20 +1,22 @@
 import { type ConfigProviderProps as ElConfigProviderProps } from 'element-plus';
 import { buildComponentName } from '@ep-container-kit/constants';
-import type { BaseDefaultPropsSource } from '@ep-container-kit/types';
+import type {
+  BaseDefaultPropsHolder,
+  BaseDefaultPropsSource,
+} from '@ep-container-kit/types';
 import type { FormContainerProvideConfig } from '@ep-container-kit/components/form-container';
-import { buildPropsDefaultValues } from '@ep-container-kit/utils';
 
 export const COMPONENT_NAME = buildComponentName('ConfigProvider');
 
-export const COMPONENT_DEFAULT_PROPS_HOLDER: BaseDefaultPropsSource<ConfigProviderProps> =
-  {} as BaseDefaultPropsSource<ConfigProviderProps>;
+export const COMPONENT_DEFAULT_PROPS_HOLDER: BaseDefaultPropsHolder<ConfigProviderProps> =
+  {};
 
-export const COMPONENT_DEFAULT_PROPS =
-  buildPropsDefaultValues<ConfigProviderProps>({
+export const COMPONENT_DEFAULT_PROPS: BaseDefaultPropsSource<ConfigProviderProps> =
+  {
     formContainer: () => {
       return {} as FormContainerProvideConfig;
     },
-  });
+  };
 
 /**
  * 配置提供器组件的 props

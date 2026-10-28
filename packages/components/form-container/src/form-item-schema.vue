@@ -15,6 +15,7 @@
     type WritableComputedRef,
   } from 'vue';
   import {
+    buildPropsDefaultValues,
     filterNullishProps,
     hasProp,
     omitEntryProps,
@@ -40,7 +41,9 @@
   );
   const slots = useSlots();
 
-  const defaultProps = COMPONENT_DEFAULT_PROPS;
+  const defaultProps = buildPropsDefaultValues<FormItemSchemaProps>(
+    COMPONENT_DEFAULT_PROPS,
+  );
   const mergedProps = computed<FormItemSchemaProps<T>>(() => {
     return {
       ...defaultProps,

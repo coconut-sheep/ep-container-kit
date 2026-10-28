@@ -264,3 +264,55 @@ export type PickToUnReadonly<T, K extends keyof T> = UnReadonly<Pick<T, K>> &
  */
 export type OmitToUnReadonly<T, K extends keyof T> = UnReadonly<Omit<T, K>> &
   Pick<T, K>;
+
+/**
+ * 用于提取 Vue 组件的插槽类型
+ * @description 兼容两种组件类型产物：
+ * 1. class 形状（`DefineComponent` 或手写组件），`$slots` 在实例类型上，如 `ElInput`；
+ * 2. vue-tsc 为「带泛型参数的 SFC」生成的函数形状，插槽只声明在调用签名的第 2 个参数（ctx）上，
+ *    此时实例类型上的 `$slots` 只是 `Readonly<InternalSlots>`（索引签名），取不到插槽名与作用域，
+ *    如 `ElAutocomplete`、`ElTableColumn`。
+ * @description ctx 参数在组件类型产物里是可选的（`ctx?: Ctx | undefined`），所以先推出整个 ctx 再去掉
+ * `undefined`；直接写 `ctx: { slots?: infer TSlots }` 会因联合类型里的 `undefined` 匹配失败
+ * @description 两种形状都不命中时返回 `unknown`，即「拿不到插槽信息」，由消费侧自行兜底，不额外约束
+ * @template T 组件类型，传 `typeof XxxComponent`
+ * @example
+ * ```ts
+ * import type { ElInput } from 'element-plus';
+ * type type1 = ComponentSlots<typeof ElInput>; // { prefix?: ..., suffix?: ..., ... }
+ * ```
+ */
+export type ComponentSlots<T> = T extends abstract new (
+  ...args: AnyValue[]
+) => { $slots: infer TSlots }
+  ? TSlots
+  : T extends (
+        props: AnyValue,
+        ctx?: infer TContext,
+        ...args: AnyValue[]
+      ) => AnyValue
+    ? NonNullable<TContext> extends { slots?: infer TSlots }
+      ? NonNullable<TSlots>
+      : unknown
+    : unknown;
+
+/**
+ * 用于提取 Vue 组件的 Props 类型
+ * @description 与 {@link ComponentSlots} 同理，同时兼容 class 形状与函数形状的组件类型产物
+ * @description 传入的不是组件类型时（如直接传 `ElInputProps` 这类 Props 类型）原样返回，
+ * 便于调用点用同一个工具同时兼容「传组件类型」与「传 Props 类型」两种写法
+ * @template T 组件类型（`typeof XxxComponent`）或 Props 类型
+ * @example
+ * ```ts
+ * import type { ElInput } from 'element-plus';
+ * type type1 = ComponentProps<typeof ElInput>; // InputProps
+ * type type2 = ComponentProps<InputProps>; // InputProps
+ * ```
+ */
+export type ComponentProps<T> = T extends abstract new (
+  ...args: AnyValue[]
+) => { $props: infer TProps }
+  ? TProps
+  : T extends (props: infer TProps, ...args: AnyValue[]) => AnyValue
+    ? TProps
+    : T;

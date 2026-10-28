@@ -8,6 +8,7 @@
     type FormContainerProvideConfig,
   } from './provide';
   import {
+    buildPropsDefaultValues,
     buildProviderInject,
     filterNullishProps,
     getRefExpose,
@@ -58,7 +59,9 @@
   const _inject =
     buildProviderInject<FormContainerProvideConfig>(FORM_PROVIDER);
 
-  const defaultProps = COMPONENT_DEFAULT_PROPS;
+  const defaultProps = buildPropsDefaultValues<FormContainerProps>(
+    COMPONENT_DEFAULT_PROPS,
+  );
   const mergedProps = computed<FormContainerProps>(() => {
     const definedProps = filterNullishProps(props);
 

@@ -6,6 +6,7 @@
     FORM_PROVIDER,
   } from '@ep-container-kit/components/form-container';
   import {
+    buildPropsDefaultValues,
     filterNullishProps,
     handleProvideValue,
     omitEntryProps,
@@ -26,7 +27,9 @@
     COMPONENT_DEFAULT_PROPS_HOLDER,
   );
 
-  const defaultProps = COMPONENT_DEFAULT_PROPS;
+  const defaultProps = buildPropsDefaultValues<ConfigProviderProps>(
+    COMPONENT_DEFAULT_PROPS,
+  );
   const mergedProps = computed<ConfigProviderProps>(() => {
     const definedProps = filterNullishProps(props);
     return {

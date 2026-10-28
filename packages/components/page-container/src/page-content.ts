@@ -1,21 +1,21 @@
 import { buildComponentName } from '@ep-container-kit/constants';
-import { buildPropsDefaultValues } from '@ep-container-kit/utils';
 import type {
+  BaseDefaultPropsHolder,
   BaseDefaultPropsSource,
   TuplesToEmits,
 } from '@ep-container-kit/types';
 
 export const COMPONENT_NAME = buildComponentName('PageContent');
 
-export const COMPONENT_DEFAULT_PROPS_HOLDER: BaseDefaultPropsSource<PageContentProps> =
+export const COMPONENT_DEFAULT_PROPS_HOLDER: BaseDefaultPropsHolder<PageContentProps> =
   {
     showBack: undefined,
     fullHeight: undefined,
     transparent: undefined,
   };
 
-export const COMPONENT_DEFAULT_PROPS =
-  buildPropsDefaultValues<PageContentProps>({
+export const COMPONENT_DEFAULT_PROPS: BaseDefaultPropsSource<PageContentProps> =
+  {
     showBack: false,
     title: '',
     bodyClass: '',
@@ -23,7 +23,7 @@ export const COMPONENT_DEFAULT_PROPS =
     transparent: false,
     width: '',
     height: '',
-  });
+  };
 
 /**
  * PageContent 的 Props 类型

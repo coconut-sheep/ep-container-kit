@@ -16,6 +16,7 @@
   import { computed, nextTick, ref, useAttrs, watch } from 'vue';
   import { CHANGE_EVENT } from '@ep-container-kit/constants';
   import {
+    buildPropsDefaultValues,
     filterNullishProps,
     omitEntryProps,
     pickEntryProps,
@@ -41,7 +42,9 @@
   const emits = defineEmits<PaginationEmitsTuple>();
   const attrs = useAttrs();
 
-  const defaultProps = COMPONENT_DEFAULT_PROPS;
+  const defaultProps = buildPropsDefaultValues<PaginationProps>(
+    COMPONENT_DEFAULT_PROPS,
+  );
   const mergedProps = computed<PaginationProps>(() => {
     const definedProps = filterNullishProps(props);
     return {

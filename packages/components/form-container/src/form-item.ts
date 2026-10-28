@@ -3,10 +3,13 @@ import type {
   AnyValue,
   Arrayable,
   BaseComponent,
+  BaseDefaultPropsHolder,
   BaseDefaultPropsSource,
   BaseEvents,
   BaseProps,
   BaseSlots,
+  ComponentProps,
+  ComponentSlots,
 } from '@ep-container-kit/types';
 import type { FormContainerProvideConfig } from './provide';
 import {
@@ -64,17 +67,16 @@ import type {
 } from 'element-plus';
 import type { EmitFn, Ref, VNode } from 'vue';
 import { buildComponentName } from '@ep-container-kit/constants';
-import { buildPropsDefaultValues } from '@ep-container-kit/utils';
 
 export const COMPONENT_NAME = buildComponentName('FormItem');
 
-export const COMPONENT_DEFAULT_PROPS_HOLDER: BaseDefaultPropsSource<FormItemProps> =
+export const COMPONENT_DEFAULT_PROPS_HOLDER: BaseDefaultPropsHolder<FormItemProps> =
   {
     visible: undefined,
     hidden: undefined,
   };
 
-export const COMPONENT_DEFAULT_PROPS = buildPropsDefaultValues<FormItemProps>({
+export const COMPONENT_DEFAULT_PROPS: BaseDefaultPropsSource<FormItemProps> = {
   visible: true,
   hidden: false,
   rules: () => {
@@ -95,25 +97,7 @@ export const COMPONENT_DEFAULT_PROPS = buildPropsDefaultValues<FormItemProps>({
   events: () => {
     return {} as FormContainerItem['events'];
   },
-});
-
-/**
- * 组件的插槽类型
- */
-type ComponentSlots<T> = T extends abstract new (...args: AnyValue[]) => {
-  $slots: infer TSlots;
-}
-  ? TSlots
-  : T;
-
-/**
- * 组件的Props类型
- */
-type ComponentProps<T> = T extends abstract new (...args: AnyValue[]) => {
-  $props: infer TProps;
-}
-  ? TProps
-  : T;
+};
 
 /**
  * 表单项默认插槽组件的事件类型

@@ -617,6 +617,8 @@ import type {
   ConfigProviderProvide,
   FormContainerProvideConfig,
   BaseDefaultPropsSource, // 默认值源：对象/数组成员必须是工厂函数
+  BaseDefaultPropsHolder, // 占位源：只能写 undefined，交给 withDefaults
+  PropsDefaultValue, // getPropsDefaultValue 的返回值：真实默认值 + 布尔占位
   AnyRecord,
   AnyValue,
   Arrayable,
@@ -645,7 +647,10 @@ Vue 的 `defineEmits` 支持两种声明形态：**参数元组**（`{ submit: [
 import type { EmitsToTuples, TuplesToEmits } from 'ep-container-kit';
 
 // 函数签名 → 参数元组：元组形态可直接交给 defineEmits
-type Emits = { submit: () => void; validate: (prop: string, ok: boolean) => void };
+type Emits = {
+  submit: () => void;
+  validate: (prop: string, ok: boolean) => void;
+};
 type EmitsTuple = EmitsToTuples<Emits>; // { submit: []; validate: [prop: string, ok: boolean] }
 
 // 参数元组 → 函数签名：用于标注监听器、组件实例方法等
@@ -789,7 +794,32 @@ npm publish        # publishConfig.access = public
 
 `withDefaults` 第二个参数的类型是 Vue 的 `InferDefaults<T>`：原始类型（`string` / `number` / `boolean` 等）允许直接写裸值，**对象与数组必须写成工厂函数**。这不是风格偏好——裸对象默认值会被所有组件实例共享，实例 A 改了它，实例 B 也会看到；工厂函数才能保证每个实例各拿一份新对象。
 
-`BaseDefaultPropsSource<T>` 就是这条规则的类型表达：按成员逐个判断，对象/数组要求工厂、原始值要求裸值，写错在编译期就会报错，且产物可以直接交给 `withDefaults`。组件内部因此统一用 `COMPONENT_DEFAULT_PROPS_SOURCE`（源形态）声明默认值，需要已求值的裸值形态时再用 `buildPropsDefaultValues(...)` 转换——一份声明，两种形态，不会各自漂移。
+`BaseDefaultPropsSource<T>` 是这条规则的类型表达：按成员逐个判断，对象/数组要求工厂、原始值要求裸值，写错在编译期就会报错。占位表另有 `BaseDefaultPropsHolder<T>`，它只允许 `undefined`——占位表不承担提供默认值的职责，写死值会直接编译报错。
+
+两个常量因此都是「源形态」，区别只在交给谁：
+
+| 常量                             | 类型                        | 交给谁                                             | 求值时机               |
+| -------------------------------- | --------------------------- | -------------------------------------------------- | ---------------------- |
+| `COMPONENT_DEFAULT_PROPS_HOLDER` | `BaseDefaultPropsHolder<T>` | `withDefaults` 第二参数                            | Vue 对每个实例调用工厂 |
+| `COMPONENT_DEFAULT_PROPS`        | `BaseDefaultPropsSource<T>` | 组件 `setup` 顶层调 `buildPropsDefaultValues(...)` | 每个实例各求值一次     |
+
+**`COMPONENT_DEFAULT_PROPS` 不能在模块顶层求值**。写成 `export const COMPONENT_DEFAULT_PROPS = buildPropsDefaultValues({ ... })` 时工厂只跑一次，结果成为跨实例共享的单例，宿主或兄弟实例改动其中的对象/数组就会互相污染。正确写法是把它保留为源，在 `setup` 顶层求值：
+
+```ts
+// src/xxx.ts
+export const COMPONENT_DEFAULT_PROPS: BaseDefaultPropsSource<XxxProps> = {
+  rules: () => [], // 工厂原样保留，此处不求值
+};
+
+// src/xxx.vue
+const defaultProps = buildPropsDefaultValues<XxxProps>(COMPONENT_DEFAULT_PROPS);
+```
+
+**Q：`COMPONENT_DEFAULT_PROPS_HOLDER` 是干什么用的？**
+
+Vue 对 Boolean prop 的隐式缺省只在「没传入 **且** 没有声明 `default`」时补 `false`。于是「调用方没传」和「调用方传了 `false`」在组件里长得一模一样，都会以 `false` 的身份进入 `filterNullishProps` 之后的合并对象，把本应生效的默认值或上层注入值盖掉。
+
+`COMPONENT_DEFAULT_PROPS_HOLDER` 就是给这类 prop 显式写 `default: undefined`：没传入时保持 `undefined`，被 `filterNullishProps` 过滤掉，合并时自然让位；传 `false` 时才真正覆盖。这两份值由 `getPropsDefaultValue(ElXxx.props)` 一次拆出——`defaultProps` 收真实默认值，`holderProps` 收无默认值的 Boolean 的 `undefined` 占位。
 
 **Q：为什么 `class` 和事件落在了内层 `el-form-item` 上？**
 

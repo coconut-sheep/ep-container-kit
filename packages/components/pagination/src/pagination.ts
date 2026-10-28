@@ -4,12 +4,12 @@ import {
   ElPagination,
 } from 'element-plus';
 import {
-  buildPropsDefaultValues,
   getPropsDefaultValue,
   isNumber,
   omitEntryProps,
 } from '@ep-container-kit/utils';
 import type {
+  BaseDefaultPropsHolder,
   BaseDefaultPropsSource,
   TuplesToEmits,
 } from '@ep-container-kit/types';
@@ -39,27 +39,37 @@ export const INVALID_PROPS: InvalidPropKey[] = [
   'layout',
 ];
 
-export const COMPONENT_DEFAULT_PROPS_HOLDER: BaseDefaultPropsSource<PaginationProps> =
+/**
+ * ElPagination 的默认值，已按用途拆成「真实默认值」与「布尔占位」两份
+ */
+const EL_DEFAULT_PROPS = getPropsDefaultValue(ElPagination.props);
+
+/**
+ * 需要从 ElPagination 默认值中剔除的键
+ * @description 无效 props 见 {@link INVALID_PROPS}；两个图标 prop 的默认值是图标组件本身，
+ * 由组件内部按 `??` 兜底（见 pagination.vue 的 `prevIcon` / `nextIcon`），不参与默认值合并
+ */
+const OMIT_DEFAULT_PROPS_KEYS = [...INVALID_PROPS, 'prevIcon', 'nextIcon'];
+
+export const COMPONENT_DEFAULT_PROPS_HOLDER: BaseDefaultPropsHolder<PaginationProps> =
   {
+    // ElPagination 中无默认值的 Boolean props：缺席时保持 undefined 而非被 Vue 补成 false，
+    // 否则 `background` 这类由 COMPONENT_DEFAULT_PROPS 显式给值的项会被 false 盖掉
+    ...omitEntryProps(EL_DEFAULT_PROPS.holderProps, OMIT_DEFAULT_PROPS_KEYS),
     compact: undefined,
     stream: undefined,
     loading: undefined,
   };
 
-export const COMPONENT_DEFAULT_PROPS = buildPropsDefaultValues<PaginationProps>(
+export const COMPONENT_DEFAULT_PROPS: BaseDefaultPropsSource<PaginationProps> =
   {
-    ...omitEntryProps(getPropsDefaultValue(ElPagination.props), [
-      ...INVALID_PROPS,
-      'prevIcon',
-      'nextIcon',
-    ]),
+    ...omitEntryProps(EL_DEFAULT_PROPS.defaultProps, OMIT_DEFAULT_PROPS_KEYS),
     background: true,
     compact: false,
     stream: false,
     loaded: 0,
     loading: false,
-  },
-);
+  };
 
 /**
  * ElPagination中当前组件不再适用的属性，已被使用替代方案实现或被整合
@@ -196,7 +206,7 @@ export type PaginationEmits = TuplesToEmits<PaginationEmitsTuple>;
  * // {
  * //   currentPage: 1,
  * //   pageSize: 10,
- * //   pageSizes: [10, 20, 50, 100, 200],
+ * //   pageSizes: [10, 20, 50, 100, 200, 500],
  * //   total: 0,
  * //   layout: ['sizes', 'prev', 'pager', 'next', 'jumper', 'loadMore', 'total'],
  * // }
@@ -205,7 +215,7 @@ export type PaginationEmits = TuplesToEmits<PaginationEmitsTuple>;
  * // {
  * //   currentPage: 1,
  * //   pageSize: 20,
- * //   pageSizes: [10, 20, 50, 100, 200],
+ * //   pageSizes: [10, 20, 50, 100, 200, 500],
  * //   total: 0,
  * //   layout: ['sizes', 'prev', 'pager', 'next', 'jumper', 'loadMore', 'total'],
  * // }

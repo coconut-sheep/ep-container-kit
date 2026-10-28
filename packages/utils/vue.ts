@@ -65,6 +65,9 @@ export const getRefExposeManuel = <T extends AnyRecord>(
 
 /**
  * 构建 props 的默认值
+ * @description 把 {@link BaseDefaultPropsSource} 的「源形态」求值成「裸值形态」：工厂函数在此调用，
+ * 原始值原样透传。**必须在实例作用域内调用**（组件 `setup` 顶层），每个实例拿到各自的对象；
+ * 若在模块顶层调用，工厂结果会成为跨实例共享的单例
  * @param props 组件的 props 定义对象
  */
 export const buildPropsDefaultValues = <T extends AnyRecord>(props: {

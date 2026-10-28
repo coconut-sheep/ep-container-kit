@@ -6,29 +6,34 @@ import {
 } from 'element-plus';
 import type {
   AnyRecord,
+  BaseDefaultPropsHolder,
   BaseDefaultPropsSource,
   TuplesToEmits,
 } from '@ep-container-kit/types';
 import type { FormItemSchemaProps } from './form-item-schema';
 import { buildComponentName } from '@ep-container-kit/constants';
-import {
-  buildPropsDefaultValues,
-  getPropsDefaultValue,
-} from '@ep-container-kit/utils';
+import { getPropsDefaultValue } from '@ep-container-kit/utils';
 
 export const COMPONENT_NAME = buildComponentName('FormContainer');
 
-export const COMPONENT_DEFAULT_PROPS_HOLDER: BaseDefaultPropsSource<FormContainerProps> =
+/**
+ * ElForm 的默认值，已按用途拆成「真实默认值」与「布尔占位」两份
+ */
+const EL_DEFAULT_PROPS = getPropsDefaultValue(ElForm.props);
+
+export const COMPONENT_DEFAULT_PROPS_HOLDER: BaseDefaultPropsHolder<FormContainerProps> =
   {
+    // ElForm 中无默认值的 Boolean props：缺席时保持 undefined 而非被 Vue 补成 false
+    ...EL_DEFAULT_PROPS.holderProps,
     vertical: undefined,
   };
 
-export const COMPONENT_DEFAULT_PROPS =
-  buildPropsDefaultValues<FormContainerProps>({
-    ...getPropsDefaultValue(ElForm.props),
+export const COMPONENT_DEFAULT_PROPS: BaseDefaultPropsSource<FormContainerProps> =
+  {
+    ...EL_DEFAULT_PROPS.defaultProps,
     itemMinWidth: 0,
     vertical: false,
-  });
+  };
 
 /**
  * 表单容器的 props

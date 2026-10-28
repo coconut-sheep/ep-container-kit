@@ -39,7 +39,7 @@ describe('getDefaultPaginationConfig', () => {
       currentPage: 1,
       pageSize: 10,
       total: 0,
-      pageSizes: [10, 20, 50, 100, 200],
+      pageSizes: [10, 20, 50, 100, 200, 500],
       // loadMore 与 total 同时存在：二者按 stream 互斥生效
       layout: ['sizes', 'prev', 'pager', 'next', 'jumper', 'loadMore', 'total'],
     });
@@ -80,6 +80,20 @@ describe('CkPagination 非紧凑形态', () => {
     });
 
     expect(wrapper.find('.pagination-loadmore').exists()).toBe(false);
+  });
+
+  it('background 默认开启，不被 Boolean 的隐式缺省盖成 false', () => {
+    const { wrapper } = mountPagination();
+
+    expect(wrapper.find('.el-pagination').classes()).toContain('is-background');
+  });
+
+  it('调用方可显式关闭 background', () => {
+    const { wrapper } = mountPagination({ props: { background: false } });
+
+    expect(wrapper.find('.el-pagination').classes()).not.toContain(
+      'is-background',
+    );
   });
 
   it('stream 为 true 时 loadMore 落进 el-pagination 的 slot，并剔除翻页与计数', () => {
