@@ -9,9 +9,9 @@ export const CONTAINER_PREFIX = 'Ck' as const;
  * @param name 组件名（不含前缀）
  * @example
  * ```ts
- * getComponentName('FormContainer'); // 'CkFormContainer'
+ * buildComponentName('FormContainer'); // 'CkFormContainer'
  * ```
  */
-export const getComponentName = (name: string) => {
+export const buildComponentName = (name: string) => {
   return `${CONTAINER_PREFIX}${name}`;
 };

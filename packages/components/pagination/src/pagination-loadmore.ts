@@ -1,11 +1,11 @@
-import { getComponentName } from '@ep-container-kit/constants';
+import { buildComponentName } from '@ep-container-kit/constants';
 import type {
   BaseDefaultPropsSource,
   TuplesToEmits,
 } from '@ep-container-kit/types';
 import { buildPropsDefaultValues } from '@ep-container-kit/utils';
 
-export const COMPONENT_NAME = getComponentName('PaginationLoadMore');
+export const COMPONENT_NAME = buildComponentName('PaginationLoadMore');
 
 export const COMPONENT_DEFAULT_PROPS_HOLDER: BaseDefaultPropsSource<PaginationLoadMoreProps> =
   {

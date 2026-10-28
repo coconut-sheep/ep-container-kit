@@ -3,10 +3,10 @@ import type {
   AnyRecord,
   BaseDefaultPropsSource,
 } from '@ep-container-kit/types';
-import { getComponentName } from '@ep-container-kit/constants';
+import { buildComponentName } from '@ep-container-kit/constants';
 import { buildPropsDefaultValues } from '@ep-container-kit/utils';
 
-export const COMPONENT_NAME = getComponentName('FormItemSchema');
+export const COMPONENT_NAME = buildComponentName('FormItemSchema');
 
 export const COMPONENT_DEFAULT_PROPS_HOLDER: BaseDefaultPropsSource<FormItemSchemaProps> =
   {} as BaseDefaultPropsSource<FormItemSchemaProps>;

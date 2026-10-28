@@ -1,10 +1,10 @@
 import { type ConfigProviderProps as ElConfigProviderProps } from 'element-plus';
-import { getComponentName } from '@ep-container-kit/constants';
+import { buildComponentName } from '@ep-container-kit/constants';
 import type { BaseDefaultPropsSource } from '@ep-container-kit/types';
 import type { FormContainerProvideConfig } from '@ep-container-kit/components/form-container';
 import { buildPropsDefaultValues } from '@ep-container-kit/utils';
 
-export const COMPONENT_NAME = getComponentName('ConfigProvider');
+export const COMPONENT_NAME = buildComponentName('ConfigProvider');
 
 export const COMPONENT_DEFAULT_PROPS_HOLDER: BaseDefaultPropsSource<ConfigProviderProps> =
   {} as BaseDefaultPropsSource<ConfigProviderProps>;

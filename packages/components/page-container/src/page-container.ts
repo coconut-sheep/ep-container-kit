@@ -1,3 +1,3 @@
-import { getComponentName } from '@ep-container-kit/constants';
+import { buildComponentName } from '@ep-container-kit/constants';
 
-export const COMPONENT_NAME = getComponentName('PageContainer');
+export const COMPONENT_NAME = buildComponentName('PageContainer');

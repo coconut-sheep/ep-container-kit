@@ -1,11 +1,11 @@
-import { getComponentName } from '@ep-container-kit/constants';
+import { buildComponentName } from '@ep-container-kit/constants';
 import { buildPropsDefaultValues } from '@ep-container-kit/utils';
 import type {
   BaseDefaultPropsSource,
   TuplesToEmits,
 } from '@ep-container-kit/types';
 
-export const COMPONENT_NAME = getComponentName('PageContent');
+export const COMPONENT_NAME = buildComponentName('PageContent');
 
 export const COMPONENT_DEFAULT_PROPS_HOLDER: BaseDefaultPropsSource<PageContentProps> =
   {

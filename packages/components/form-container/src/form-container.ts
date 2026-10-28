@@ -10,13 +10,13 @@ import type {
   TuplesToEmits,
 } from '@ep-container-kit/types';
 import type { FormItemSchemaProps } from './form-item-schema';
-import { getComponentName } from '@ep-container-kit/constants';
+import { buildComponentName } from '@ep-container-kit/constants';
 import {
   buildPropsDefaultValues,
   getPropsDefaultValue,
 } from '@ep-container-kit/utils';
 
-export const COMPONENT_NAME = getComponentName('FormContainer');
+export const COMPONENT_NAME = buildComponentName('FormContainer');
 
 export const COMPONENT_DEFAULT_PROPS_HOLDER: BaseDefaultPropsSource<FormContainerProps> =
   {

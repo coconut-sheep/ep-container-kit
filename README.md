@@ -590,7 +590,7 @@ import {
 ```ts
 import {
   CONTAINER_PREFIX, // 'Ck'
-  getComponentName,
+  buildComponentName,
   FORM_PROVIDER,
   FORM_CONTAINER_PROVIDE_KEY_LIST,
   CHANGE_EVENT,

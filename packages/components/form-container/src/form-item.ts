@@ -63,10 +63,10 @@ import type {
   CascaderEmits as ElCascaderEmits,
 } from 'element-plus';
 import type { EmitFn, Ref, VNode } from 'vue';
-import { getComponentName } from '@ep-container-kit/constants';
+import { buildComponentName } from '@ep-container-kit/constants';
 import { buildPropsDefaultValues } from '@ep-container-kit/utils';
 
-export const COMPONENT_NAME = getComponentName('FormItem');
+export const COMPONENT_NAME = buildComponentName('FormItem');
 
 export const COMPONENT_DEFAULT_PROPS_HOLDER: BaseDefaultPropsSource<FormItemProps> =
   {

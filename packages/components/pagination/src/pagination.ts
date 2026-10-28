@@ -1,4 +1,4 @@
-import { getComponentName } from '@ep-container-kit/constants';
+import { buildComponentName } from '@ep-container-kit/constants';
 import {
   type PaginationProps as ElPaginationProps,
   ElPagination,
@@ -17,7 +17,7 @@ import type {
 /**
  * Pagination 的组件名
  */
-export const COMPONENT_NAME = getComponentName('Pagination');
+export const COMPONENT_NAME = buildComponentName('Pagination');
 
 /**
  * ElPagination 中在本组件无效的 Props
