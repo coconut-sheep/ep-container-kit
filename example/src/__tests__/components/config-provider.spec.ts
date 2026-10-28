@@ -19,13 +19,13 @@ const schema: FormContainerItem[] = [
  * 用于验证配置经 provide/inject 下发到表单容器的完整链路
  */
 const mountWithProvider = (
-  form: Record<string, unknown>,
+  formContainer: Record<string, unknown>,
   containerProps: Record<string, unknown> = {},
 ) => {
   const state = reactive({ username: '' });
 
   const wrapper = mount(CkConfigProvider, {
-    props: { form },
+    props: { formContainer },
     slots: {
       default: () => {
         return h(CkFormContainer, {
@@ -44,7 +44,7 @@ const mountWithProvider = (
 };
 
 describe('CkConfigProvider 下发配置', () => {
-  it('form 中的配置项被注入到 CkFormContainer 并传给 el-form', () => {
+  it('formContainer 中的配置项被注入到 CkFormContainer 并传给 el-form', () => {
     const { elForm } = mountWithProvider({
       labelWidth: '120px',
       labelPosition: 'left',
@@ -73,7 +73,7 @@ describe('CkConfigProvider 下发配置', () => {
     );
   });
 
-  it('未提供 form 时使用默认配置，不报错', () => {
+  it('未提供 formContainer 时使用默认配置，不报错', () => {
     const { elForm, wrapper } = mountWithProvider({});
 
     // el-form 自身的默认值
@@ -83,9 +83,9 @@ describe('CkConfigProvider 下发配置', () => {
     );
   });
 
-  it('form 之外的配置透传给 el-config-provider', () => {
+  it('formContainer 之外的配置透传给 el-config-provider', () => {
     const wrapper = mount(CkConfigProvider, {
-      props: { form: {}, size: 'small', zIndex: 3000 },
+      props: { formContainer: {}, size: 'small', zIndex: 3000 },
       slots: { default: () => h('div', 'content') },
       global,
     });
@@ -96,13 +96,13 @@ describe('CkConfigProvider 下发配置', () => {
 
     expect(elConfigProvider.props('size')).toBe('small');
     expect(elConfigProvider.props('zIndex')).toBe(3000);
-    // form 是库内私有配置，不能透传给 Element Plus
-    expect(elConfigProvider.props('form')).toBeUndefined();
+    // formContainer 是库内私有配置，不能透传给 Element Plus
+    expect(elConfigProvider.props('formContainer')).toBeUndefined();
   });
 
   it('默认插槽内容原样渲染', () => {
     const wrapper = mount(CkConfigProvider, {
-      props: { form: {} },
+      props: { formContainer: {} },
       slots: { default: () => h('span', { class: 'inner' }, 'inner') },
       global,
     });

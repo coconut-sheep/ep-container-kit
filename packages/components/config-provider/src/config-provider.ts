@@ -6,15 +6,15 @@ import { buildPropsDefaultValues } from '@ep-container-kit/utils';
 
 export const COMPONENT_NAME = getComponentName('ConfigProvider');
 
-export const COMPONENT_DEFAULT_PROPS_SOURCE: BaseDefaultPropsSource<ConfigProviderProps> =
-  {
+export const COMPONENT_DEFAULT_PROPS_HOLDER: BaseDefaultPropsSource<ConfigProviderProps> =
+  {} as BaseDefaultPropsSource<ConfigProviderProps>;
+
+export const COMPONENT_DEFAULT_PROPS =
+  buildPropsDefaultValues<ConfigProviderProps>({
     formContainer: () => {
       return {} as FormContainerProvideConfig;
     },
-  };
-
-export const COMPONENT_DEFAULT_PROPS =
-  buildPropsDefaultValues<ConfigProviderProps>(COMPONENT_DEFAULT_PROPS_SOURCE);
+  });
 
 /**
  * 配置提供器组件的 props

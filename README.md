@@ -527,7 +527,7 @@ const schema: FormContainerItem<UserForm>[] = [
 ```vue
 <template>
   <CkConfigProvider
-    :form="{
+    :form-container="{
       labelWidth: '100px',
       labelPosition: 'right',
       itemMinWidth: '200px',
