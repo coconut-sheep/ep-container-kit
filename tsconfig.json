@@ -27,7 +27,10 @@
       "@/*": ["./example/src/*"],
       "@ep-container-kit": ["./packages/ep-container-kit"],
       "@ep-container-kit/components": ["./packages/components"],
-      "@ep-container-kit/components/*": ["./packages/components/*"],
+      "@ep-container-kit/components/*": [
+        "./packages/components/*/index.ts",
+        "./packages/components/*"
+      ],
       "@ep-container-kit/constants": ["./packages/constants"],
       "@ep-container-kit/constants/*": ["./packages/constants/*"],
       "@ep-container-kit/types": ["./packages/types"],

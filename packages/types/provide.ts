@@ -1,6 +1,5 @@
 import type { ComputedRef, InjectionKey } from 'vue';
 import type { AnyRecord } from './tools';
-import type { FormContainerProps } from '@ep-container-kit/components/form-container';
 
 /**
  * 通过 provide 下发的配置项的类型
@@ -23,11 +22,3 @@ export type ConfigProvideKey<T extends AnyRecord> = InjectionKey<
 export type ConfigProviderProvide<T extends AnyRecord> = {
   [K in keyof T]: ComputedRef<T[K]>;
 };
-
-/**
- * 表单容器可通过 provide/inject 下发的配置项
- */
-export type FormContainerProvideConfig = Pick<
-  FormContainerProps,
-  'vertical' | 'labelWidth' | 'labelPosition' | 'itemMinWidth' | 'itemMaxWidth'
->;

@@ -1,14 +1,21 @@
-import type {
-  ConfigProvideKey,
-  FormContainerProvideConfig,
-} from '@ep-container-kit/types';
+import type { ConfigProvideKey } from '@ep-container-kit/types';
+import type { FormContainerProps } from './form-container';
+
+/**
+ * 表单容器可通过 provide/inject 下发的配置项
+ * @description 归属表单容器域：由 `CkConfigProvider` 或 `CkFormContainer` 提供，`CkFormItem` 消费
+ */
+export type FormContainerProvideConfig = Pick<
+  FormContainerProps,
+  'vertical' | 'labelWidth' | 'labelPosition' | 'itemMinWidth' | 'itemMaxWidth'
+>;
 
 /**
  * 表单相关的 Provide 注入 key
  * @description 由 `CkConfigProvider` 或 `CkFormContainer` 提供，`CkFormItem` 消费
  */
 export const FORM_PROVIDER: ConfigProvideKey<FormContainerProvideConfig> =
-  Symbol('formProvider');
+  Symbol('formContainerProvider');
 
 /**
  * 表单容器 provide 的配置 key 列表

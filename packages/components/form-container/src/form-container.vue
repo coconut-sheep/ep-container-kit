@@ -1,14 +1,12 @@
 <script setup lang="ts" generic="T extends AnyRecord = AnyRecord">
   import { computed, provide, useAttrs, useTemplateRef, warn } from 'vue';
   import { ElForm, type FormInstance, type FormItemProp } from 'element-plus';
+  import type { AnyRecord } from '@ep-container-kit/types';
   import {
     FORM_CONTAINER_PROVIDE_KEY_LIST,
     FORM_PROVIDER,
-  } from '@ep-container-kit/constants';
-  import type {
-    AnyRecord,
-    FormContainerProvideConfig,
-  } from '@ep-container-kit/types';
+    type FormContainerProvideConfig,
+  } from './provide';
   import {
     buildProviderInject,
     filterNullishProps,

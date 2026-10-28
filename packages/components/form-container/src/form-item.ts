@@ -7,8 +7,8 @@ import type {
   BaseEvents,
   BaseProps,
   BaseSlots,
-  FormContainerProvideConfig,
 } from '@ep-container-kit/types';
+import type { FormContainerProvideConfig } from './provide';
 import {
   ElAutocomplete,
   ElCheckbox,

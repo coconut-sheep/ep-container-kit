@@ -1,16 +1,12 @@
 <script setup lang="ts">
   import { computed, h, useAttrs, useSlots } from 'vue';
   import { ElFormItem } from 'element-plus';
+  import type { AnyRecord, AnyValue, BaseSlots } from '@ep-container-kit/types';
   import {
     FORM_CONTAINER_PROVIDE_KEY_LIST,
     FORM_PROVIDER,
-  } from '@ep-container-kit/constants';
-  import type {
-    AnyRecord,
-    AnyValue,
-    BaseSlots,
-    FormContainerProvideConfig,
-  } from '@ep-container-kit/types';
+    type FormContainerProvideConfig,
+  } from './provide';
   import {
     buildProviderInject,
     defineProp,

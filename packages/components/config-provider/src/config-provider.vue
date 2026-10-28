@@ -4,7 +4,7 @@
   import {
     FORM_CONTAINER_PROVIDE_KEY_LIST,
     FORM_PROVIDER,
-  } from '@ep-container-kit/constants';
+  } from '@ep-container-kit/components/form-container';
   import { handleProvideValue, omitEntryProps } from '@ep-container-kit/utils';
   import {
     COMPONENT_NAME,
@@ -26,14 +26,17 @@
    */
   provide(
     FORM_PROVIDER,
-    handleProvideValue(() => props.form || {}, FORM_CONTAINER_PROVIDE_KEY_LIST),
+    handleProvideValue(
+      () => props.formContainer || {},
+      FORM_CONTAINER_PROVIDE_KEY_LIST,
+    ),
   );
 
   /**
    * ElConfigProvider 组件的 props 属性
    */
   const providerProps = computed(() => {
-    return omitEntryProps(props, ['form']);
+    return omitEntryProps(props, ['formContainer']);
   });
 </script>
 

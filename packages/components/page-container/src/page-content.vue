@@ -1,10 +1,11 @@
 <script setup lang="ts">
-  import { computed, type CSSProperties } from 'vue';
+  import { computed, type CSSProperties, useSlots } from 'vue';
   import { ElIcon } from 'element-plus';
   import { ArrowLeft } from '@element-plus/icons-vue';
-  import { toSizeValue } from '@ep-container-kit/utils';
+  import { filterNullishProps, toSizeValue } from '@ep-container-kit/utils';
   import {
     COMPONENT_DEFAULT_PROPS,
+    COMPONENT_DEFAULT_PROPS_HOLDER,
     COMPONENT_NAME,
     type PageContentEmitsTuple,
     type PageContentProps,
@@ -16,10 +17,19 @@
 
   const props = withDefaults(
     defineProps<PageContentProps>(),
-    COMPONENT_DEFAULT_PROPS,
+    COMPONENT_DEFAULT_PROPS_HOLDER,
   );
-
   const emits = defineEmits<PageContentEmitsTuple>();
+  const slots = useSlots();
+
+  const defaultProps = COMPONENT_DEFAULT_PROPS;
+  const mergedProps = computed<PageContentProps>(() => {
+    const definedProps = filterNullishProps(props);
+    return {
+      ...defaultProps,
+      ...definedProps,
+    };
+  });
 
   /**
    * 内容区尺寸
@@ -29,16 +39,16 @@
   const contentStyle = computed<CSSProperties>(() => {
     const result: CSSProperties = {};
 
-    if (props.fullHeight) {
+    if (mergedProps.value.fullHeight) {
       result.height = '100%';
     } else {
-      const height = toSizeValue(props.height);
+      const height = toSizeValue(mergedProps.value.height);
       if (height) {
         result.height = height;
       }
     }
 
-    const width = toSizeValue(props.width);
+    const width = toSizeValue(mergedProps.value.width);
     if (width) {
       result.width = width;
     }
@@ -53,8 +63,14 @@
 
 <template>
   <div class="page-content" :style="contentStyle">
-    <div v-if="$slots.header || title || showBack" class="page-content--header">
-      <div v-if="title || showBack" class="header-title">
+    <div
+      v-if="slots.header || mergedProps.title || mergedProps.showBack"
+      class="page-content--header"
+    >
+      <div
+        v-if="mergedProps.title || mergedProps.showBack"
+        class="header-title"
+      >
         <span
           v-if="showBack"
           class="header-back"
@@ -70,11 +86,11 @@
             </el-icon>
           </slot>
         </span>
-        <span class="header-title-text">{{ props.title }}</span>
+        <span class="header-title-text">{{ mergedProps.title }}</span>
       </div>
       <slot name="header" />
     </div>
-    <div v-if="$slots.default" class="page-content--body" :class="bodyClass">
+    <div v-if="slots.default" class="page-content--body" :class="bodyClass">
       <slot />
     </div>
   </div>

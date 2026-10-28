@@ -681,7 +681,7 @@ ep-container-kit/
 │   │   ├── page-container/    # CkPageContainer + CkPageContent
 │   │   ├── pagination/        # CkPagination
 │   │   └── index.ts
-│   ├── constants/             # @ep-container-kit/constants（常量、InjectionKey）
+│   ├── constants/             # @ep-container-kit/constants（事件名、组件名前缀）
 │   ├── types/                 # @ep-container-kit/types（公共类型）
 │   ├── utils/                 # @ep-container-kit/utils（运行时工具）
 │   ├── styles/                # @ep-container-kit/styles（布局工具类、动画）
@@ -710,6 +710,8 @@ ep-container-kit/
 ```text
 types ← constants ← utils ← components ← ep-container-kit
 ```
+
+`types` 不依赖任何具体组件：provide 契约（`FormContainerProvideConfig`、`FORM_PROVIDER`、`FORM_CONTAINER_PROVIDE_KEY_LIST`）按域放在所属组件内，见 `components/form-container/src/provide.ts`。
 
 ---
 

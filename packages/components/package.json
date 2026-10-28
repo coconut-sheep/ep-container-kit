@@ -9,6 +9,10 @@
   "types": "index.ts",
   "exports": {
     ".": "./index.ts",
+    "./config-provider": "./config-provider/index.ts",
+    "./form-container": "./form-container/index.ts",
+    "./page-container": "./page-container/index.ts",
+    "./pagination": "./pagination/index.ts",
     "./*": "./*"
   },
   "dependencies": {

@@ -47,4 +47,10 @@ export {
 
 export type { FormItemSchemaProps } from './src/form-item-schema';
 
+export {
+  type FormContainerProvideConfig,
+  FORM_PROVIDER,
+  FORM_CONTAINER_PROVIDE_KEY_LIST,
+} from './src/provide';
+
 export default CkFormContainer;
