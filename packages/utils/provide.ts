@@ -3,7 +3,7 @@ import type {
   AnyRecord,
   ConfigProvideKey,
 } from '@ep-container-kit/types';
-import { computed, inject } from 'vue';
+import { computed, inject as ElInject } from 'vue';
 import { defineProp } from './object';
 import { isNull, isUndefined } from './types';
 
@@ -127,10 +127,12 @@ export const handleInjectValue = <T extends AnyRecord = AnyRecord>(options: {
 
 /**
  * 构建 inject 函数，自动处理默认值
+ * @param inject vue的inject函数
  * @param key 提供 key 值，用于 `inject` 函数
  * @param defaultValue 默认值，用于 `inject` 函数，若未提供则使用空对象
  */
 export const buildProviderInject = <T extends AnyRecord>(
+  inject: typeof ElInject,
   key: ConfigProvideKey<T>,
   defaultValue?: T,
 ) => {

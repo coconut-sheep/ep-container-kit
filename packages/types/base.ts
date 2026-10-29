@@ -28,12 +28,21 @@ export type BaseComponent = Component | string | null;
  * 直接写 `T extends AnyRecord | AnyArray` 时，`FormItemRule | FormItemRule[] | undefined`
  * 这类联合会被拆成多个成员分别判断，结果成为 `AnyFunction<A> | AnyFunction<B>` 的**函数联合**，
  * 任何单个工厂都匹配不上；整体判断后得到 `AnyFunction<T>`，工厂返回 `undefined` 也合法
+ * @description `unknown` 先行短路，是为了兜住 props 类型里**由索引签名兜底**的成员：
+ * `TableColumnProps` 继承自 EP 泛型 SFC 的 props，后者被 `__VLS_PROPS_FALLBACK` 影响，
+ * `Partial<...>` 会把 `Record<string, unknown>` 这条索引签名一起带出来；随后映射类型
+ * `[K in keyof T]` 同样保留索引签名，于是值类型变成这里的 `InferPropDefault<unknown>`。
+ * 若不短路，`NonNullable<unknown>` 即 `{}`，会命中 `AnyRecord` 分支得到 `AnyFunction<unknown>`，
+ * 让索引签名只接受函数，任何原始类型默认值（如 `hidden: false`）都报 TS2322。
+ * 短路后索引签名维持 `unknown`，与 EP 侧这条兜底签名的语义一致
  * 词序对齐 Vue 内置的 `InferDefault` / `InferDefaults`
  * @template T 单个 prop 的属性类型
  */
-type InferPropDefault<T> = [NonNullable<T>] extends [AnyRecord | AnyArray]
-  ? AnyFunction<T>
-  : T;
+type InferPropDefault<T> = [unknown] extends [T]
+  ? T
+  : [NonNullable<T>] extends [AnyRecord | AnyArray]
+    ? AnyFunction<T>
+    : T;
 
 /**
  * 基础的默认属性源类型

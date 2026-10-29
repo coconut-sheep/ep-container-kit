@@ -3,13 +3,19 @@ import FormContainerVue from './src/form-container.vue';
 import FormItemVue from './src/form-item.vue';
 import FormItemSchemaVue from './src/form-item-schema.vue';
 
-/** 表单容器组件，用于批量渲染 FormItem */
+/**
+ * 表单容器组件，用于批量渲染 FormItem
+ */
 export const CkFormContainer = withInstall(FormContainerVue);
 
-/** 表单项组件，可直接使用，也用于被 CkFormContainer 批量渲染 */
+/**
+ * 表单项组件，可直接使用，也用于被 CkFormContainer 批量渲染
+ */
 export const CkFormItem = withInstall(FormItemVue);
 
-/** 基于 schema 批量渲染 FormItem 的容器组件 */
+/**
+ * 基于 schema 批量渲染 FormItem 的容器组件
+ */
 export const CkFormItemSchema = withInstall(FormItemSchemaVue);
 
 export {

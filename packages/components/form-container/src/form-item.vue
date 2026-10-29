@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { computed, h, useAttrs, useSlots } from 'vue';
+  import { computed, h, inject, useAttrs, useSlots } from 'vue';
   import { ElFormItem } from 'element-plus';
   import type { AnyRecord, AnyValue, BaseSlots } from '@ep-container-kit/types';
   import {
@@ -44,6 +44,7 @@
   const attrs = useAttrs();
 
   const _inject = buildProviderInject<FormContainerProvideConfig>(
+    inject,
     FORM_CONTAINER_PROVIDER,
   );
 
@@ -61,8 +62,12 @@
       componentValue: (definedProps.itemProps ||
         {}) as FormContainerProvideConfig,
       propList: FORM_CONTAINER_PROVIDE_KEYS.filter((key) => {
-        // vertical 仅作用于 FormContainer 布局，不传递给 FormItem
-        return !['vertical'].includes(key);
+        return [
+          'labelPosition',
+          'labelWidth',
+          'itemMinWidth',
+          'itemMaxWidth',
+        ].includes(key);
       }),
     });
 
@@ -71,8 +76,8 @@
       ...definedProps,
       ...defineProp('itemProps', {
         ...defaultProps.itemProps,
-        ...definedProps.itemProps,
         ...injectProps,
+        ...definedProps.itemProps,
       }),
     } as FormItemProps;
   });
@@ -127,7 +132,7 @@
       _defaultSlots['default'] = slots.default;
     }
 
-    // 使用模板语法传入的默认插槽，在props值有效时生效
+    // 使用模板语法传入的默认插槽，在prop值有效时生效
     if (formItemProps.value.prop) {
       const _slotName = `slot_${formItemProps.value.prop}`;
       const _slotContent = slots[_slotName];
@@ -192,15 +197,15 @@
    */
   const formItemSlots = computed<BaseSlots>(() => {
     // 除默认插槽之外的其他插槽
-    const otherSlots = omitEntryProps(mergedProps.value.itemSlots ?? {}, [
+    const _otherSlots = omitEntryProps(mergedProps.value.itemSlots ?? {}, [
       'default',
     ]);
     // 使用模板语法传入的其他插槽
-    const templateOtherSlots = omitEntryProps(slots, ['default']);
+    const _templateOtherSlots = omitEntryProps(slots, ['default']);
     return {
       ...defaultSlots.value,
-      ...otherSlots,
-      ...templateOtherSlots,
+      ..._otherSlots,
+      ..._templateOtherSlots,
     };
   });
 
