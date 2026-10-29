@@ -71,3 +71,30 @@ export const getPropsDefaultValue = (props: AnyValue): PropsDefaultValue => {
 
   return { defaultProps, holderProps };
 };
+
+/**
+ * 获取 props 定义对象的键，并按指定键列表过滤
+ * @description 过滤方向由 `include` 决定，与 {@link pickEntryProps} / {@link omitEntryProps} 的语义对齐：
+ * `true` 为「只保留」，`false` 为「排除」。`propList` 为空时不产生任何过滤，即原样返回全部键
+ * @description 结果只取自 `props` 自身的键，`propList` 里多出的键不会凭空出现
+ * @param props 组件的 props 定义对象，如 `ElForm.props`
+ * @param [propList = []] 参与过滤的键列表
+ * @param [include = false] 过滤方向：`true` 只保留 `propList` 中的键，`false` 排除 `propList` 中的键
+ * @example
+ * ```ts
+ * // 只取指定键
+ * getPropsKeys(ElForm.props, ['model', 'rules'], true); // ['model', 'rules']
+ * // 排除指定键
+ * getPropsKeys(ElForm.props, ['model', 'rules']); // 除 model / rules 之外的全部键
+ * ```
+ */
+export const getPropsKeys = <T extends AnyRecord>(
+  props: T,
+  propList: (keyof T)[] = [],
+  include: boolean = false,
+): Extract<keyof T, string>[] => {
+  // `Object.keys` 只返回字符串键，因此用 `Extract` 收窄，避免返回值承诺 number 键
+  const keys = Object.keys(props) as Extract<keyof T, string>[];
+
+  return keys.filter((key) => propList.includes(key) === include);
+};

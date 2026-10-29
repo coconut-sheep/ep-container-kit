@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { defineComponent } from 'vue';
 import { ElForm, ElPagination } from 'element-plus';
-import { getPropsDefaultValue } from 'ep-container-kit';
+import { getPropsDefaultValue, getPropsKeys } from 'ep-container-kit';
 
 describe('getPropsDefaultValue', () => {
   it('把声明了默认值的 props 收进 defaultProps', () => {
@@ -91,5 +91,49 @@ describe('holderProps 的作用', () => {
 
     expect(passed.props('plain')).toBe(true);
     expect(passed.props('held')).toBe(true);
+  });
+});
+
+describe('getPropsKeys', () => {
+  const props = {
+    a: { type: String },
+    b: { type: Number },
+    c: { type: Boolean },
+  };
+
+  it('不传列表时返回全部键', () => {
+    expect(getPropsKeys(props)).toStrictEqual(['a', 'b', 'c']);
+  });
+
+  it('include 为 true 时只保留列表中的键', () => {
+    expect(getPropsKeys(props, ['a', 'c'], true)).toStrictEqual(['a', 'c']);
+  });
+
+  it('include 为 false 时排除列表中的键', () => {
+    expect(getPropsKeys(props, ['a', 'c'])).toStrictEqual(['b']);
+  });
+
+  it('列表为空时，include 决定是全部还是全无', () => {
+    expect(getPropsKeys(props)).toStrictEqual(['a', 'b', 'c']);
+    expect(getPropsKeys(props, [], true)).toStrictEqual([]);
+  });
+
+  it('只返回 props 自身存在的键，列表里多出的键不会出现', () => {
+    // 类型上不允许传不存在的键，这里绕过类型校验单独锁定运行时行为
+    const extraKeys = ['a', 'd'] as unknown as (keyof typeof props)[];
+
+    expect(getPropsKeys(props, extraKeys, true)).toStrictEqual(['a']);
+    expect(getPropsKeys(props, extraKeys)).toStrictEqual(['b', 'c']);
+  });
+
+  it('可直接用于 Element Plus 组件的 props 定义', () => {
+    const formKeys = getPropsKeys(ElForm.props);
+
+    expect(formKeys).toContain('model');
+    expect(formKeys).toContain('labelPosition');
+    expect(getPropsKeys(ElForm.props, ['model', 'rules'], true)).toStrictEqual([
+      'model',
+      'rules',
+    ]);
   });
 });

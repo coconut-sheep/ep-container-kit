@@ -3,8 +3,8 @@
   import { ElFormItem } from 'element-plus';
   import type { AnyRecord, AnyValue, BaseSlots } from '@ep-container-kit/types';
   import {
-    FORM_CONTAINER_PROVIDE_KEY_LIST,
-    FORM_PROVIDER,
+    FORM_CONTAINER_PROVIDE_KEYS,
+    FORM_CONTAINER_PROVIDER,
     type FormContainerProvideConfig,
   } from './provide';
   import {
@@ -43,8 +43,9 @@
   const slots = useSlots();
   const attrs = useAttrs();
 
-  const _inject =
-    buildProviderInject<FormContainerProvideConfig>(FORM_PROVIDER);
+  const _inject = buildProviderInject<FormContainerProvideConfig>(
+    FORM_CONTAINER_PROVIDER,
+  );
 
   const defaultProps = buildPropsDefaultValues<FormItemProps>(
     COMPONENT_DEFAULT_PROPS,
@@ -59,7 +60,7 @@
         {}) as FormContainerProvideConfig,
       componentValue: (definedProps.itemProps ||
         {}) as FormContainerProvideConfig,
-      propList: FORM_CONTAINER_PROVIDE_KEY_LIST.filter((key) => {
+      propList: FORM_CONTAINER_PROVIDE_KEYS.filter((key) => {
         // vertical 仅作用于 FormContainer 布局，不传递给 FormItem
         return !['vertical'].includes(key);
       }),

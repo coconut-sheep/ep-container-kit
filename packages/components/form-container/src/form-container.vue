@@ -3,8 +3,8 @@
   import { ElForm, type FormInstance, type FormItemProp } from 'element-plus';
   import type { AnyRecord } from '@ep-container-kit/types';
   import {
-    FORM_CONTAINER_PROVIDE_KEY_LIST,
-    FORM_PROVIDER,
+    FORM_CONTAINER_PROVIDE_KEYS,
+    FORM_CONTAINER_PROVIDER,
     type FormContainerProvideConfig,
   } from './provide';
   import {
@@ -56,8 +56,9 @@
     );
   }
 
-  const _inject =
-    buildProviderInject<FormContainerProvideConfig>(FORM_PROVIDER);
+  const _inject = buildProviderInject<FormContainerProvideConfig>(
+    FORM_CONTAINER_PROVIDER,
+  );
 
   const defaultProps = buildPropsDefaultValues<FormContainerProps>(
     COMPONENT_DEFAULT_PROPS,
@@ -72,7 +73,7 @@
         injectValue: _inject,
         defaultValue: defaultProps,
         componentValue: definedProps,
-        propList: FORM_CONTAINER_PROVIDE_KEY_LIST,
+        propList: FORM_CONTAINER_PROVIDE_KEYS,
       }),
     };
   });
@@ -81,11 +82,8 @@
    * 将合并后的表单配置继续提供给下层组件
    */
   provide(
-    FORM_PROVIDER,
-    handleProvideValue(
-      () => mergedProps.value,
-      FORM_CONTAINER_PROVIDE_KEY_LIST,
-    ),
+    FORM_CONTAINER_PROVIDER,
+    handleProvideValue(() => mergedProps.value, FORM_CONTAINER_PROVIDE_KEYS),
   );
 
   /**

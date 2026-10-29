@@ -2,8 +2,8 @@
   import { computed, provide } from 'vue';
   import { ElConfigProvider } from 'element-plus';
   import {
-    FORM_CONTAINER_PROVIDE_KEY_LIST,
-    FORM_PROVIDER,
+    FORM_CONTAINER_PROVIDE_KEYS,
+    FORM_CONTAINER_PROVIDER,
   } from '@ep-container-kit/components/form-container';
   import {
     buildPropsDefaultValues,
@@ -42,10 +42,10 @@
    * 提供 FormContainer 组件的 provide 属性
    */
   provide(
-    FORM_PROVIDER,
+    FORM_CONTAINER_PROVIDER,
     handleProvideValue(
       () => mergedProps.value.formContainer || {},
-      FORM_CONTAINER_PROVIDE_KEY_LIST,
+      FORM_CONTAINER_PROVIDE_KEYS,
     ),
   );
 

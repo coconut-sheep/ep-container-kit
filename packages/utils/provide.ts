@@ -57,7 +57,7 @@ export const handleProvideValue = <T extends AnyRecord, K extends keyof T>(
  * ```ts
  * // 与 vue 的 inject 函数结合使用
  * const _inject = inject<ConfigProviderProvide<FormContainerProvideConfig>>(
- *   FORM_PROVIDER,
+ *   FORM_CONTAINER_PROVIDER,
  *   {},
  * );
  * // 假设已经是计算完的结果

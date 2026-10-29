@@ -10,7 +10,7 @@ import type {
   BaseDefaultPropsSource,
   TuplesToEmits,
 } from '@ep-container-kit/types';
-import type { FormItemSchemaProps } from './form-item-schema';
+import type { FormItemSchemaItem } from './form-item-schema';
 import { buildComponentName } from '@ep-container-kit/constants';
 import { getPropsDefaultValue } from '@ep-container-kit/utils';
 
@@ -23,7 +23,6 @@ const EL_DEFAULT_PROPS = getPropsDefaultValue(ElForm.props);
 
 export const COMPONENT_DEFAULT_PROPS_HOLDER: BaseDefaultPropsHolder<FormContainerProps> =
   {
-    // ElForm 中无默认值的 Boolean props：缺席时保持 undefined 而非被 Vue 补成 false
     ...EL_DEFAULT_PROPS.holderProps,
     vertical: undefined,
   };
@@ -56,7 +55,7 @@ export type FormContainerProps<T extends AnyRecord = AnyRecord> = {
   /**
    * 表单的 Schema 配置
    */
-  schema?: FormItemSchemaProps<T>['schema'];
+  schema?: FormItemSchemaItem<T>['schema'];
 } & Partial<Omit<FormProps, 'model'>>;
 
 /**

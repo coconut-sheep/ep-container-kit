@@ -9,7 +9,7 @@ import { installComponents } from '@ep-container-kit/utils';
 // 组件与组件类型（局部按需导入入口）
 export * from '@ep-container-kit/components';
 
-// 工具函数与常量（withInstall、toSizeValue、FORM_PROVIDER 等）
+// 工具函数与常量（withInstall、toSizeValue、FORM_CONTAINER_PROVIDER 等）
 export * from '@ep-container-kit/utils';
 export * from '@ep-container-kit/constants';
 

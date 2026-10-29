@@ -27,3 +27,9 @@ export type FormItemSchemaProps<T extends AnyRecord = AnyRecord> = {
    */
   schema: FormContainerItem<T>[];
 };
+
+/**
+ * FormItemSchema的Item类型
+ */
+export type FormItemSchemaItem<T extends AnyRecord = AnyRecord> =
+  FormItemSchemaProps<T>;
