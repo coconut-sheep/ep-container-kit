@@ -43,6 +43,8 @@
 | `CkPageContainer`  | 页面容器，铺满父级并承担滚动，作为页面根节点                                                |
 | `CkPageContent`    | 页面内容区，提供「标题栏 + 内容区」两段式布局，支持 `show-back` 返回按钮                    |
 | `CkPagination`     | 分页器，两套基本单元由 `compact` 切换，数据由 `v-model` 提供                                |
+| `CkTableContainer` | 表格容器，解决表格高度问题，底部 `footer` 插槽用于承载分页                                  |
+| `CkTableColumnSchema` | 表格列 Schema 渲染器，把一组列配置批量渲染成 `ElTableColumn`，并提供一层共享默认值       |
 
 ---
 
@@ -381,6 +383,57 @@ const schema: FormContainerItem<UserForm>[] = [
 
 ---
 
+## 表格：容器 + Schema
+
+组件库**不封装 `ElTable`**：它本身的功能面太广，包一层只会变成负担。这里的封装只解决 `ElTable` 自己做不了的两件事——高度布局与列的批量渲染，`ElTable` 依然由使用者显式提供。
+
+```vue
+<template>
+  <CkTableContainer height="100%">
+    <ElTable :data="rows" height="100%">
+      <CkTableColumnSchema
+        :schema="schema"
+        :column-props="{ align: 'center', showOverflowTooltip: true }"
+      />
+    </ElTable>
+    <template #footer>
+      <CkPagination v-model:current-page="page" v-model:page-size="size" :total="total" />
+    </template>
+  </CkTableContainer>
+</template>
+```
+
+### CkTableContainer 属性
+
+| 属性          | 类型               | 默认值 | 说明                                |
+| ------------- | ------------------ | ------ | ----------------------------------- |
+| `width`       | `string \| number` | `''`   | 宽度，纯数字按 px 处理              |
+| `height`      | `string \| number` | `''`   | 高度，纯数字按 px 处理              |
+| `bodyClass`   | `string`           | `''`   | 暴露给内容区的 class                |
+| `footerClass` | `string`           | `''`   | 暴露给底部区域的 class              |
+
+容器是 `display: flex` 的纵向布局：内容区 `flex: 1` 并 `overflow: hidden`，底部区域按内容高度收缩。要让它真正限制表格高度，需要给容器一个确定高度（如 `height="100%"` 且父级有高度），并让 `ElTable` 也撑满内容区。
+
+### 插槽
+
+| 插槽      | 说明                                           |
+| --------- | ---------------------------------------------- |
+| `default` | 内容区，放 `ElTable`                           |
+| `footer`  | 底部区域，通常放分页器；不传则不渲染该区域     |
+
+### CkTableColumnSchema 属性
+
+| 属性          | 类型                        | 说明                                                  |
+| ------------- | --------------------------- | ----------------------------------------------------- |
+| `schema`      | `TableColumnItem[]`         | 每项渲染成一个 `ElTableColumn`                        |
+| `columnProps` | `TableContainerProvideConfig` | 所有列共享的属性，等同于批量传参                      |
+
+合并优先级：**`schema` 项 > `columnProps` > `CkConfigProvider` 注入 > `ElTableColumn` 自身默认值**。`schema` 项的 `hidden` 只用于控制该列是否渲染，不会作为属性传给 `ElTableColumn`。
+
+`schema` 项与列的插槽默认可来自三个地方，优先级由低到高：`item.slots.default`、模板 `#default`、`slot_${prop}` 定向插槽。
+
+---
+
 ## 分页
 
 `CkPagination` 封装 Element Plus 的分页器，把「页码 / 每页条数 / 总条数 / 布局」收敛成一个对象，由 `v-model` 进出，列表页只需要关心一处状态。
@@ -520,9 +573,9 @@ const schema: FormContainerItem<UserForm>[] = [
 
 ---
 
-## 全局配置：表单项
+## 全局配置：表单项与表格列
 
-`CkConfigProvider` 向整棵组件树注入表单项的全局配置，子组件无需逐个透传即可统一生效。
+`CkConfigProvider` 向整棵组件树注入表单与表格列的全局配置，子组件无需逐个透传即可统一生效。
 
 ```vue
 <template>
@@ -550,6 +603,18 @@ const schema: FormContainerItem<UserForm>[] = [
 | `itemMaxWidth`  | 表单项最大宽度                                            |
 
 `CkConfigProvider` 本身就是一个 `el-config-provider`，其余属性（`size`、`locale`、`zIndex` 等）会原样透传。
+
+### 表格列：tableContainer
+
+`tableContainer` 接受的键与 `ElTableColumn` 的属性一一对应，下发给其下所有 `CkTableColumnSchema`。由于组件库不封装 `Table` 与 `TableColumn`，这份配置**只作用于 `ElTableColumn`**。
+
+```vue
+<CkConfigProvider :table-container="{ align: 'center', showOverflowTooltip: true }">
+  <router-view />
+</CkConfigProvider>
+```
+
+`prop` / `property` / `label` / `hidden` 是每列各自不同的属性，不会参与下发。
 
 ---
 
@@ -771,7 +836,7 @@ npm publish        # publishConfig.access = public
 | ---------- | ----------------------------------------------------------------------- | --------- |
 | Form       | `CkConfigProvider`、`CkFormContainer`、`CkFormItem`、`CkFormItemSchema` | ✅ 已实现 |
 | Page       | `CkPageContainer`、`CkPageContent`                                      | ✅ 已实现 |
-| Table      | `CkTableContainer`、`CkTableColumn`、`CkTableColumnSchema`              | 🚧 规划中 |
+| Table      | `CkTableContainer`、`CkTableColumnSchema`                               | ✅ 已实现 |
 | Pagination | `CkPaginationContainer`                                                 | 🚧 规划中 |
 | Tree       | `CkTreeContainer`、`CkTreeSelect`                                       | 🚧 规划中 |
 | Detail     | `CkDetailContainer`、`CkDetailItem`、`CkDetailItemSchema`               | 🚧 规划中 |
@@ -789,6 +854,15 @@ npm publish        # publishConfig.access = public
 **Q：`defineProps` 为什么是运行时声明而不是类型声明？**
 
 `FormItemProps` 是 20 个成员的判别联合，`defineProps<T>()` 要求 `@vue/compiler-sfc` 在构建期把它翻译成运行时 props，解析该联合会无限递归（`RangeError: Maximum call stack size exceeded`）。因此 `CkFormItem` / `CkFormItemSchema` 显式声明运行时 props，再断言回类型，对外暴露的 Schema 类型不受影响。
+
+**Q：`CkTableColumnSchema` 为什么不直接支持 `align`、`width` 这些 `ElTableColumn` 的属性，而要多包一层 `columnProps`？**
+
+两个原因：
+
+1. `@vue/compiler-sfc` 无法把 `ComponentProps<typeof ElTableColumn>` 这类泛型 SFC 的条件类型展开成运行时 props 声明，`defineProps<TableColumnProps>()` 会直接报 `Failed to resolve extends base type`，组件编译不过。
+2. 即使能展开，平铺之后所有 Boolean 属性都会在缺席时被 Vue 隐式补成 `false`，反过来盖掉 `ElTableColumn` 自己的默认值——例如 `resizable`、`filterMultiple` 本该是 `true`。
+
+收进 `columnProps` 后这两个问题都不存在：props 声明保持简单，Boolean 属性完全交给 `ElTableColumn` 自己处理默认值。
 
 **Q：为什么组件的默认值要写成工厂函数？`BaseDefaultPropsSource` 是什么？**
 

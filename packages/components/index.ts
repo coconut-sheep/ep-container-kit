@@ -12,11 +12,7 @@ import {
 } from './form-container';
 import { CkPageContainer, CkPageContent } from './page-container';
 import { CkPagination } from './pagination';
-import {
-  CkTableContainer,
-  CkTableColumn,
-  CkTableColumnSchema,
-} from './table-container';
+import { CkTableContainer, CkTableColumnSchema } from './table-container';
 
 /**
  * 组件库所有组件列表
@@ -31,6 +27,5 @@ export const components = [
   CkPageContent,
   CkPagination,
   CkTableContainer,
-  CkTableColumn,
   CkTableColumnSchema,
 ];

@@ -6,6 +6,10 @@
     FORM_CONTAINER_PROVIDER,
   } from '@ep-container-kit/components/form-container';
   import {
+    TABLE_CONTAINER_PROVIDE_KEYS,
+    TABLE_CONTAINER_PROVIDER,
+  } from '@ep-container-kit/components/table-container';
+  import {
     buildPropsDefaultValues,
     filterNullishProps,
     handleProvideValue,
@@ -50,10 +54,25 @@
   );
 
   /**
+   * 提供 TableContainer 组件的 provide 属性
+   * @description 由于不提供 Table 与 TableColumn 的封装，这份配置最终只作用于 `ElTableColumn`
+   */
+  provide(
+    TABLE_CONTAINER_PROVIDER,
+    handleProvideValue(
+      () => mergedProps.value.tableContainer || {},
+      TABLE_CONTAINER_PROVIDE_KEYS,
+    ),
+  );
+
+  /**
    * ElConfigProvider 组件的 props 属性
    */
   const providerProps = computed(() => {
-    return omitEntryProps(mergedProps.value, ['formContainer']);
+    return omitEntryProps(mergedProps.value, [
+      'formContainer',
+      'tableContainer',
+    ]);
   });
 </script>
 

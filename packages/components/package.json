@@ -13,6 +13,7 @@
     "./form-container": "./form-container/index.ts",
     "./page-container": "./page-container/index.ts",
     "./pagination": "./pagination/index.ts",
+    "./table-container": "./table-container/index.ts",
     "./*": "./*"
   },
   "dependencies": {

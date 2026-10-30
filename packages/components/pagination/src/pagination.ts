@@ -75,9 +75,8 @@ export const COMPONENT_DEFAULT_PROPS: BaseDefaultPropsSource<PaginationProps> =
  * ElPagination中当前组件不再适用的属性，已被使用替代方案实现或被整合
  * - `defaultCurrentPage`、`defaultPageSize`、`hideOnSinglePage`、`size`、`pageCount` 不再适用，已使用替代方案实现
  * - `small` 官方已经不推荐使用
- * - `currentPage`、`pageSize`、`pageSizes`、`total`、`layout` 已被整合到 PaginationConfig类型中
+ * - `currentPage`、`pageSize`、`pageSizes`、`total`、`layout` 已被整合到 {@link PaginationConfig} 中
  * - 其中 `layout` 由字符串转为字符串数组
- * @see PaginationConfig
  */
 export type InvalidPropKey =
   | 'defaultCurrentPage'
@@ -94,10 +93,9 @@ export type InvalidPropKey =
 
 /**
  * Pagination 的 Props 类型
- * @description 其中 `currentPage`、`pageSize`、`pageSizes`、`total`、`layout` 被整合到modelValue的类型`PaginationConfig`中
+ * @description 其中 `currentPage`、`pageSize`、`pageSizes`、`total`、`layout` 被整合到modelValue的类型 {@link PaginationConfig} 中
  * @description 其中 `defaultCurrentPage`、`defaultPageSize`、`hideOnSinglePage`、`small`、`size`、`pageCount` 属性被移除
- * @see PaginationConfig
- * @see InvalidPropKey
+ * @description 组件中不合法和属性见：{@link InvalidPropKey}
  */
 export type PaginationProps = {
   /**
@@ -133,7 +131,7 @@ export type PaginationProps = {
  * @description 各片段与props的相性：
  * @description `compact` 为 `true` 时：
  * - `pager` 只显示当前页码；
- * - `sizes` 会转化成类似ElInputNumber的左加右减的样式；
+ * - `sizes` 会转化成类似 `ElInputNumber` 的左加右减的样式；
  * - `->` 不可用或不生效
  * @description `stream` 为 `true` 时：
  * - `prev`、`pager`、`next`、`jumper`、`total` 不可用或不生效
