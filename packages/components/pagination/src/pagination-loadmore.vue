@@ -59,7 +59,7 @@
 <template>
   <div
     class="pagination-loadmore"
-    :class="{ 'is-disabled': disabled || !loadMoreAble }"
+    :class="{ 'is-disabled': mergedProps.disabled }"
   >
     <el-button
       :disabled="mergedProps.disabled || !loadMoreAble"

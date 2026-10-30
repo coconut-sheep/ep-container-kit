@@ -39,13 +39,17 @@ export type PaginationLoadMoreProps = {
   total?: number;
   /**
    * 是否处于加载中
-   * @description 为 `true` 时按钮呈现 loading，且不可点击
+   * @description 为 `true` 时按钮呈现 loading 并不可点击，但「已加载 / 总数量」不受影响，
+   * 仍按正常颜色显示（加载中不是禁用，数据依然可读）
    * @default false
    */
   loading?: boolean;
   /**
    * 是否禁用
-   * @description 由 Pagination 汇总 `disabled` 与 `loading` 后传入，为 `true` 时按钮不可点击
+   * @description 只承载 Pagination 的 `disabled`，**不并入 `loading`**：为 `true` 时按钮不可点击，
+   * 且「已加载 / 总数量」一并置灰
+   * @description 与「已加载完」（`loaded >= total`）也不是同一件事：后者只让按钮自身进入
+   * 禁用态，计数仍按正常颜色显示
    * @default false
    */
   disabled?: boolean;

@@ -282,7 +282,7 @@
         :loaded="mergedProps.loaded ?? 0"
         :total="modelValue.total"
         :loading="Boolean(mergedProps.loading)"
-        :disabled="!isOperable"
+        :disabled="Boolean(mergedProps.disabled)"
         @load-more="handleLoadMore"
       />
     </el-pagination>
@@ -330,7 +330,7 @@
           :loaded="mergedProps.loaded ?? 0"
           :total="modelValue.total"
           :loading="Boolean(mergedProps.loading)"
-          :disabled="!isOperable"
+          :disabled="Boolean(mergedProps.disabled)"
           @load-more="handleLoadMore"
         />
         <div

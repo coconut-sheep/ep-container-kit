@@ -119,6 +119,11 @@ export type PaginationProps = {
   loaded?: number;
   /**
    * 加载中状态
+   * @description 为 `true` 时所有可操作单元都不可点击：紧凑形态下禁用 `prev`、`next`、`sizes`、
+   * `jumper` 与 `loadMore` 按钮；非紧凑形态下连同 Element Plus 一起禁用（避免加载中途改页长）
+   * @description 它与 `disabled` 不同：只拦交互，不让文字变灰 —— `loadMore` 片段里的
+   * 「已加载 / 总数量」在加载中仍按正常颜色显示
+   * @default false
    */
   loading?: boolean;
 } & Partial<Omit<ElPaginationProps, InvalidPropKey>>;
