@@ -79,6 +79,7 @@
     flex-direction: column;
     overflow: hidden;
     width: 100%;
+    row-gap: 10px;
 
     .table-container--body {
       display: flex;
