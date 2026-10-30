@@ -4,8 +4,8 @@
 
 用一份数据描述整张表单，容器负责布局、取值、校验与全局配置下发。
 
-> **当前状态**：`v0.1.0`，已实现表单域（Form）相关的 4 个组件并具备完整发布链路。
-> 表格（Table）、分页（Pagination）、树（Tree）、详情（Detail）仍在规划中，见 [后续规划](#后续规划)。
+> **当前状态**：`v0.1.0`，表单域（Form）、页面骨架（Page）、分页（Pagination）、表格（Table）四个模块已实现并具备完整发布链路。
+> 树（Tree）、详情（Detail）仍在规划中，见 [后续规划](#后续规划)。
 
 ---
 
@@ -27,6 +27,7 @@
 - **属性透传明确**：`CkFormItem` / `CkFormItemSchema` 关闭属性自动继承并手动透传到 `el-form-item`；`CkFormContainer` 同样关闭自动继承，按 `$attrs` → `el-form` 声明过的 props → `v-model` 的顺序显式绑定，保证误传的 `:model` 盖不掉数据源
 - **类型完整**：`FormContainerItem<T>` 是 20 个成员的判别联合，`prop` 受业务数据类型约束
 - **页面骨架**：`CkPageContainer` + `CkPageContent` 提供「滚动容器 + 标题栏 + 内容区」的标准页面布局，`show-back` 内置返回箭头
+- **表格只补缺口**：`CkTableContainer` 负责高度布局与 `footer` 插槽，`CkTableColumnSchema` 负责列的批量渲染并支持一层共享默认值；`ElTable` 不封装，仍由使用者显式提供
 - **样式无侵入**：页面容器只用纯色底 + 细边框，不依赖 `backdrop-filter` 玻璃拟态与宿主自定义变量，颜色全部可被 Element Plus 主题变量覆盖；产物不含任何全局选择器（无 `*` / `html` / `body` 规则），不改宿主的 `box-sizing`、字体与滚动行为
 - **标准库产物**：ESM + CJS + 单文件 d.ts + 独立 CSS，`vue` / `element-plus` / `@element-plus/icons-vue` 走 peer
 
@@ -34,17 +35,17 @@
 
 ## 组件总览
 
-| 组件               | 说明                                                                                        |
-| ------------------ | ------------------------------------------------------------------------------------------- |
-| `CkConfigProvider` | 全局配置提供器，通过 provide/inject 向子组件下发表单全局配置；本身也是 `el-config-provider` |
-| `CkFormContainer`  | 表单容器，`ElForm` 的轻量封装，支持直接传入 schema 渲染整表单                               |
-| `CkFormItem`       | 表单项，`ElFormItem` 的轻量封装，可脱离容器单独使用                                         |
-| `CkFormItemSchema` | `CkFormItem` 的 Schema 批量渲染实现                                                         |
-| `CkPageContainer`  | 页面容器，铺满父级并承担滚动，作为页面根节点                                                |
-| `CkPageContent`    | 页面内容区，提供「标题栏 + 内容区」两段式布局，支持 `show-back` 返回按钮                    |
-| `CkPagination`     | 分页器，两套基本单元由 `compact` 切换，数据由 `v-model` 提供                                |
-| `CkTableContainer` | 表格容器，解决表格高度问题，底部 `footer` 插槽用于承载分页                                  |
-| `CkTableColumnSchema` | 表格列 Schema 渲染器，把一组列配置批量渲染成 `ElTableColumn`，并提供一层共享默认值       |
+| 组件                  | 说明                                                                                          |
+| --------------------- | --------------------------------------------------------------------------------------------- |
+| `CkConfigProvider`    | 全局配置提供器，通过 provide/inject 下发表单与表格列的全局配置；本身也是 `el-config-provider` |
+| `CkFormContainer`     | 表单容器，`ElForm` 的轻量封装，支持直接传入 schema 渲染整表单                                 |
+| `CkFormItem`          | 表单项，`ElFormItem` 的轻量封装，可脱离容器单独使用                                           |
+| `CkFormItemSchema`    | `CkFormItem` 的 Schema 批量渲染实现                                                           |
+| `CkPageContainer`     | 页面容器，铺满父级并承担滚动，作为页面根节点                                                  |
+| `CkPageContent`       | 页面内容区，提供「标题栏 + 内容区」两段式布局，支持 `show-back` 返回按钮                      |
+| `CkPagination`        | 分页器，两套基本单元由 `compact` 切换，数据由 `v-model` 提供                                  |
+| `CkTableContainer`    | 表格容器，解决表格高度问题，底部 `footer` 插槽用于承载分页                                    |
+| `CkTableColumnSchema` | 表格列 Schema 渲染器，把一组列配置批量渲染成 `ElTableColumn`，并提供一层共享默认值            |
 
 ---
 
@@ -388,49 +389,120 @@ const schema: FormContainerItem<UserForm>[] = [
 组件库**不封装 `ElTable`**：它本身的功能面太广，包一层只会变成负担。这里的封装只解决 `ElTable` 自己做不了的两件事——高度布局与列的批量渲染，`ElTable` 依然由使用者显式提供。
 
 ```vue
+<script setup lang="ts">
+  import { ref } from 'vue';
+  import { ElTable, ElTag } from 'element-plus';
+  import type { PaginationConfig, TableColumnItem } from 'ep-container-kit';
+  import {
+    CkPagination,
+    CkTableColumnSchema,
+    CkTableContainer,
+    getDefaultPaginationConfig,
+  } from 'ep-container-kit';
+
+  type Asset = { name: string; ip: string; status: 'online' | 'offline' };
+
+  const rows = ref<Asset[]>([]);
+
+  // 用 satisfies 而不是类型标注：既校验 prop 是 Asset 的键，又不会把 slots 带进推断结果
+  const columns = [
+    { prop: 'name', label: '名称', minWidth: 160 },
+    { prop: 'ip', label: 'IP', minWidth: 140 },
+    { prop: 'status', label: '状态', width: 100 },
+  ] satisfies TableColumnItem<Asset>[];
+
+  const pagination = ref<PaginationConfig>(
+    getDefaultPaginationConfig({ total: 0 }),
+  );
+
+  const handleChange = async (config: PaginationConfig) => {
+    // 事件在 nextTick 派发，此时 config 已是最新值，直接拿去请求
+    const res = await fetchList(config.currentPage, config.pageSize);
+    rows.value = res.rows;
+    pagination.value.total = res.total;
+  };
+</script>
+
 <template>
+  <!-- 容器给出确定高度，ElTable 也 height="100%"，表格才会在内容区内滚动 -->
   <CkTableContainer height="100%">
     <ElTable :data="rows" height="100%">
       <CkTableColumnSchema
-        :schema="schema"
+        :schema="columns"
         :column-props="{ align: 'center', showOverflowTooltip: true }"
-      />
+      >
+        <!-- 模板默认插槽作用于所有列，按列自身声明的 prop 取对应字段 -->
+        <template #default="{ row, column }">
+          {{ row[column.property as keyof Asset] }}
+        </template>
+        <!-- slot_${prop} 定向插槽只接管 prop 为 status 的那一列，优先级最高 -->
+        <template #slot_status="{ row }">
+          <ElTag :type="row.status === 'online' ? 'success' : 'info'">
+            {{ row.status === 'online' ? '在线' : '离线' }}
+          </ElTag>
+        </template>
+      </CkTableColumnSchema>
     </ElTable>
+
     <template #footer>
-      <CkPagination v-model:current-page="page" v-model:page-size="size" :total="total" />
+      <CkPagination v-model="pagination" @change="handleChange" />
     </template>
   </CkTableContainer>
 </template>
 ```
 
+完整可运行版本见 `example/src/views/TableDemo.vue`。
+
 ### CkTableContainer 属性
 
-| 属性          | 类型               | 默认值 | 说明                                |
-| ------------- | ------------------ | ------ | ----------------------------------- |
-| `width`       | `string \| number` | `''`   | 宽度，纯数字按 px 处理              |
-| `height`      | `string \| number` | `''`   | 高度，纯数字按 px 处理              |
-| `bodyClass`   | `string`           | `''`   | 暴露给内容区的 class                |
-| `footerClass` | `string`           | `''`   | 暴露给底部区域的 class              |
+| 属性          | 类型               | 默认值 | 说明                   |
+| ------------- | ------------------ | ------ | ---------------------- |
+| `width`       | `string \| number` | `''`   | 宽度，纯数字按 px 处理 |
+| `height`      | `string \| number` | `''`   | 高度，纯数字按 px 处理 |
+| `bodyClass`   | `string`           | `''`   | 暴露给内容区的 class   |
+| `footerClass` | `string`           | `''`   | 暴露给底部区域的 class |
 
-容器是 `display: flex` 的纵向布局：内容区 `flex: 1` 并 `overflow: hidden`，底部区域按内容高度收缩。要让它真正限制表格高度，需要给容器一个确定高度（如 `height="100%"` 且父级有高度），并让 `ElTable` 也撑满内容区。
+容器是 `display: flex` 的纵向布局：内容区 `flex: 1` 且 `overflow: hidden`，底部区域按内容高度收缩。要让它真正限制表格高度，需要给容器一个确定高度（如 `height="100%"` 且父级有高度），并让 `ElTable` 也 `height="100%"`——只给容器高度的话，表格仍会按内容撑开。
 
 ### 插槽
 
-| 插槽      | 说明                                           |
-| --------- | ---------------------------------------------- |
-| `default` | 内容区，放 `ElTable`                           |
-| `footer`  | 底部区域，通常放分页器；不传则不渲染该区域     |
+| 插槽      | 说明                                       |
+| --------- | ------------------------------------------ |
+| `default` | 内容区，放 `ElTable`                       |
+| `footer`  | 底部区域，通常放分页器；不传则不渲染该区域 |
 
 ### CkTableColumnSchema 属性
 
-| 属性          | 类型                        | 说明                                                  |
-| ------------- | --------------------------- | ----------------------------------------------------- |
-| `schema`      | `TableColumnItem[]`         | 每项渲染成一个 `ElTableColumn`                        |
-| `columnProps` | `TableContainerProvideConfig` | 所有列共享的属性，等同于批量传参                      |
+| 属性          | 类型                          | 默认值 | 说明                             |
+| ------------- | ----------------------------- | ------ | -------------------------------- |
+| `schema`      | `TableColumnItem[]`           | `[]`   | 每项渲染成一个 `ElTableColumn`   |
+| `columnProps` | `TableContainerProvideConfig` | `{}`   | 所有列共享的属性，等同于批量传参 |
 
 合并优先级：**`schema` 项 > `columnProps` > `CkConfigProvider` 注入 > `ElTableColumn` 自身默认值**。`schema` 项的 `hidden` 只用于控制该列是否渲染，不会作为属性传给 `ElTableColumn`。
 
-`schema` 项与列的插槽默认可来自三个地方，优先级由低到高：`item.slots.default`、模板 `#default`、`slot_${prop}` 定向插槽。
+### schema 项
+
+每一项就是一份 `ElTableColumn` 的属性表，另外多了三个自有字段：
+
+| 字段     | 类型               | 说明                                                                     |
+| -------- | ------------------ | ------------------------------------------------------------------------ |
+| `prop`   | `string`           | 取数用的字段名，同时决定 `slot_${prop}` 插槽是否生效                     |
+| `hidden` | `boolean`          | 为真时该列不渲染，等价于 `v-if`；不会作为属性落到 `ElTableColumn` 上     |
+| `slots`  | `TableColumnSlots` | 列级插槽，目前只有 `default` 参与优先级比较，其余（`header` 等）原样透传 |
+
+其余字段（`label`、`width`、`align`、`fixed`、`sortable` 等）全部来自 `ElTableColumn` 自身的 props。
+
+### 插槽优先级
+
+列的默认插槽可来自三个地方，下层永远覆盖上层，**不是叠加**：
+
+| 优先级  | 来源                 | 说明                                   |
+| ------- | -------------------- | -------------------------------------- |
+| 1（低） | `item.slots.default` | 写在 schema 里的列级插槽               |
+| 2       | 模板 `#default`      | 组件上声明的默认插槽，作用于所有列     |
+| 3（高） | 模板 `#slot_${prop}` | 定向插槽，仅在 `prop` 为 truthy 时生效 |
+
+`header` / `expand` / `filter-icon` 等具名插槽没有定向机制，写在组件上会**同时**给到每一列。
 
 ---
 
@@ -609,12 +681,14 @@ const schema: FormContainerItem<UserForm>[] = [
 `tableContainer` 接受的键与 `ElTableColumn` 的属性一一对应，下发给其下所有 `CkTableColumnSchema`。由于组件库不封装 `Table` 与 `TableColumn`，这份配置**只作用于 `ElTableColumn`**。
 
 ```vue
-<CkConfigProvider :table-container="{ align: 'center', showOverflowTooltip: true }">
+<CkConfigProvider
+  :table-container="{ align: 'center', showOverflowTooltip: true }"
+>
   <router-view />
 </CkConfigProvider>
 ```
 
-`prop` / `property` / `label` / `hidden` 是每列各自不同的属性，不会参与下发。
+`prop` / `property` / `label` / `hidden` 是每列各自不同的属性，不会参与下发；其余键按 `TABLE_CONTAINER_PROVIDE_KEYS` 逐项与组件值比对，因此**优先级是 `CkTableColumnSchema` 的 `columnProps` > 注入值 > 默认值**——想局部改回某个值，在 `columnProps` 里重写即可，不必绕开 `CkConfigProvider`。
 
 ---
 
@@ -750,6 +824,7 @@ ep-container-kit/
 │   │   ├── form-container/
 │   │   ├── page-container/    # CkPageContainer + CkPageContent
 │   │   ├── pagination/        # CkPagination
+│   │   ├── table-container/   # CkTableContainer + CkTableColumnSchema
 │   │   └── index.ts
 │   ├── constants/             # @ep-container-kit/constants（事件名、组件名前缀）
 │   ├── types/                 # @ep-container-kit/types（公共类型）
@@ -760,7 +835,7 @@ ep-container-kit/
 │       ├── vite.config.ts
 │       └── dist/
 ├── example/                   # @ep-container-kit/example（演示与调试，不发布）
-│   └── src/views/             # FormDemo.vue / PageDemo.vue / PaginationDemo.vue
+│   └── src/views/             # FormDemo / PageDemo / PaginationDemo / TableDemo
 ├── tsconfig.json
 ├── tsconfig.node.json
 └── pnpm-workspace.yaml
@@ -837,7 +912,7 @@ npm publish        # publishConfig.access = public
 | Form       | `CkConfigProvider`、`CkFormContainer`、`CkFormItem`、`CkFormItemSchema` | ✅ 已实现 |
 | Page       | `CkPageContainer`、`CkPageContent`                                      | ✅ 已实现 |
 | Table      | `CkTableContainer`、`CkTableColumnSchema`                               | ✅ 已实现 |
-| Pagination | `CkPaginationContainer`                                                 | 🚧 规划中 |
+| Pagination | `CkPagination`                                                          | ✅ 已实现 |
 | Tree       | `CkTreeContainer`、`CkTreeSelect`                                       | 🚧 规划中 |
 | Detail     | `CkDetailContainer`、`CkDetailItem`、`CkDetailItemSchema`               | 🚧 规划中 |
 

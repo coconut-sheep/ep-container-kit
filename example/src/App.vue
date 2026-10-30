@@ -10,6 +10,7 @@
         <RouterLink class="app__link" to="/form">表单容器</RouterLink>
         <RouterLink class="app__link" to="/page">页面容器</RouterLink>
         <RouterLink class="app__link" to="/pagination">分页</RouterLink>
+        <RouterLink class="app__link" to="/table">表格</RouterLink>
       </nav>
     </header>
 

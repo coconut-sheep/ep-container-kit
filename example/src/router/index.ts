@@ -25,6 +25,12 @@ const router = createRouter({
       component: () => import('@/views/PaginationDemo.vue'),
       meta: { title: '分页' },
     },
+    {
+      path: '/table',
+      name: 'table',
+      component: () => import('@/views/TableDemo.vue'),
+      meta: { title: '表格' },
+    },
   ],
 });
 
