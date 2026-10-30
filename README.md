@@ -451,7 +451,7 @@ const schema: FormContainerItem<UserForm>[] = [
 </template>
 ```
 
-完整可运行版本见 `example/src/views/TableDemo.vue`。
+完整可运行版本见 `example/src/demos/table/TableContainerBasic.vue`。
 
 ### CkTableContainer 属性
 
@@ -835,7 +835,12 @@ ep-container-kit/
 │       ├── vite.config.ts
 │       └── dist/
 ├── example/                   # @ep-container-kit/example（演示与调试，不发布）
-│   └── src/views/             # FormDemo / PageDemo / PaginationDemo / TableDemo
+│   └── src/
+│       ├── App.vue            # 后台管理式布局：左侧菜单 + 右侧内容
+│       ├── router/            # menu.ts 是菜单树，路由表由它派生
+│       ├── demos/             # 每个示例一个 SFC，用 ?raw 同时作为源码展示
+│       ├── views/             # 每个组件一页，一页由多个 page-content 组成
+│       └── components/        # DemoPage / DemoBlock / CodeBlock
 ├── tsconfig.json
 ├── tsconfig.node.json
 └── pnpm-workspace.yaml

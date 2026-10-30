@@ -8,7 +8,8 @@
     warn,
   } from 'vue';
   import { ElForm, type FormInstance, type FormItemProp } from 'element-plus';
-  import type { AnyRecord } from '@ep-container-kit/types';
+  import type { AnyRecord, Arrayable } from '@ep-container-kit/types';
+  import type { VNode } from 'vue';
   import {
     FORM_CONTAINER_PROVIDE_KEYS,
     FORM_CONTAINER_PROVIDER,
@@ -37,6 +38,18 @@
     name: COMPONENT_NAME,
     inheritAttrs: false,
   });
+
+  /**
+   * 组件插槽
+   * @description 默认插槽用于自行编排表单项；`slot_${prop}` 会原样透传给内部的
+   * `CkFormItemSchema`，用于接管某个 `prop` 对应的表单项（优先级最高）
+   */
+  defineSlots<{
+    default?: () => Arrayable<VNode>;
+    [key: `slot_${string}`]:
+      | ((scope?: AnyRecord) => Arrayable<VNode>)
+      | undefined;
+  }>();
 
   const sourceData = defineModel<T>({
     required: false,

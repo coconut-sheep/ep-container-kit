@@ -1,0 +1,25 @@
+// 示例站全局重置。
+//
+// 只做布局基准，不碰 Element Plus 的组件内部样式：那些尺寸由 --el-* 变量控制，
+// 在这里重置会穿透到组件内部，让示例显示的和实际接入时不一致。
+
+// 统一 box-sizing 为 border-box。
+// 默认的 content-box 会把 padding / border 叠加在 width、height 之外：
+// 示例块的 padding 会让内部 width:100% 的源码区撑出容器，页面上就多出横向滚动条，
+// 定宽侧栏（240px + 1px 分隔线）也会比预期宽 1px。
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+// 高度链必须逐级确定，CkPageContainer 的 height: 100% 才有参照
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
